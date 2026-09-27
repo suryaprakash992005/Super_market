@@ -6,6 +6,10 @@ export default {
   ],
   theme: {
     extend: {
+      screens: {
+        'xs': '400px',
+        '3xl': '1920px',
+      },
       colors: {
         brand: {
           crimson: '#C8102E',

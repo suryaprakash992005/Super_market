@@ -9,7 +9,8 @@ export const MobileNav: React.FC = () => {
   const location = useLocation();
 
   // Hide mobile nav during full-page checkout, dedicated shop bill permalink, or product detail page
-  const isProductDetailPage = location.pathname.startsWith('/products/') && location.pathname !== '/products';
+  // Note: product detail route is /product/:id (singular), NOT /products/:id
+  const isProductDetailPage = /^\/product\/[^/]+$/.test(location.pathname);
   if (
     location.pathname === '/checkout' || 
     location.pathname.endsWith('/bill') ||

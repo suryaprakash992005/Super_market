@@ -9,7 +9,8 @@ export const MobileCartBar: React.FC = () => {
   const location = useLocation();
 
   // Hide on checkout, cart, order pages, or product detail page where dedicated purchase bar is present
-  const isProductDetailPage = location.pathname.startsWith('/products/') && location.pathname !== '/products';
+  // Note: product detail route is /product/:id (singular), NOT /products/:id
+  const isProductDetailPage = /^\/product\/[^/]+$/.test(location.pathname);
   if (
     cartCount === 0 || 
     location.pathname === '/checkout' || 

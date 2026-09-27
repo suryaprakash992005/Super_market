@@ -186,8 +186,61 @@ export const AdminProducts: React.FC = () => {
         </select>
       </div>
 
-      {/* Products Table */}
-      <div className="bg-white rounded-2xl border border-surface-border overflow-hidden shadow-subtle">
+      {/* Products — Mobile Card View (< md) */}
+      <div className="md:hidden space-y-3">
+        {filteredProducts.length === 0 ? (
+          <div className="bg-white rounded-2xl border border-surface-border p-8 text-center">
+            <Package className="w-10 h-10 text-stone-300 mx-auto mb-2" />
+            <p className="text-xs font-semibold text-muted">No products found</p>
+          </div>
+        ) : (
+          filteredProducts.map((p) => (
+            <div key={p.id} className="bg-white rounded-2xl border border-surface-border shadow-subtle p-3.5 flex items-center gap-3">
+              <img
+                src={p.images[0]}
+                alt={p.name}
+                className="w-14 h-14 rounded-xl object-cover border border-surface-border shrink-0"
+              />
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-obsidian text-xs truncate">{p.name}</p>
+                <p className="text-[10px] text-muted">{p.categoryName} • {p.unit}</p>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="font-bold text-obsidian text-xs">{formatCurrency(p.price)}</span>
+                  {p.mrp > p.price && (
+                    <span className="text-[10px] text-muted line-through">{formatCurrency(p.mrp)}</span>
+                  )}
+                  <span className={`text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-full ${
+                    p.inStock ? 'bg-green-100 text-supermarket-fresh' : 'bg-red-100 text-red-700'
+                  }`}>
+                    {p.inStock ? `✓ ${p.stockQuantity}` : 'OOS'}
+                  </span>
+                </div>
+              </div>
+              <div className="flex flex-col gap-1.5 shrink-0">
+                <button
+                  onClick={() => openEditModal(p)}
+                  className="p-2 text-stone-600 hover:text-brand-crimson hover:bg-stone-100 rounded-lg transition-colors"
+                  title="Edit"
+                >
+                  <Edit className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={() => {
+                    if (confirm(`Delete ${p.name}?`)) deleteProduct(p.id);
+                  }}
+                  className="p-2 text-stone-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                  title="Delete"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* Products — Desktop Table View (md+) */}
+      <div className="hidden md:block bg-white rounded-2xl border border-surface-border overflow-hidden shadow-subtle">
         <div className="overflow-x-auto">
           <table className="w-full text-xs text-left">
             <thead>
@@ -267,6 +320,7 @@ export const AdminProducts: React.FC = () => {
           </table>
         </div>
       </div>
+
 
       {/* Add / Edit Product Modal */}
       {isModalOpen && (

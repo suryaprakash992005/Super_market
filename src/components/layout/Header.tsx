@@ -362,35 +362,35 @@ export const Header: React.FC = () => {
         {/* Main Header Row - relative z-30 guarantees search dropdown floats over department bar */}
         <div 
           className={cn(
-            "relative z-30 max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between gap-3 sm:gap-6 transition-all duration-200",
-            isScrolled ? "py-2.5 sm:py-3" : "py-3 sm:py-3.5"
+            "relative z-30 max-w-7xl mx-auto px-3 sm:px-6 flex items-center justify-between gap-2 sm:gap-6 transition-all duration-200",
+            isScrolled ? "py-2 sm:py-3" : "py-2.5 sm:py-3.5"
           )}
         >
           {/* Brand Logo with Refined Entrance & Subtle Hover Animation */}
-          <div className="flex items-center gap-3 shrink-0 animate-entrance-logo">
+          <div className="flex items-center gap-2 sm:gap-3 shrink-0 min-w-0 animate-entrance-logo">
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="md:hidden p-1.5 text-stone-700 hover:text-brand-crimson hover:bg-stone-100 rounded-lg transition-colors"
+              className="md:hidden p-1.5 text-stone-700 hover:text-brand-crimson hover:bg-stone-100 rounded-lg transition-colors shrink-0"
               aria-label="Toggle navigation menu"
             >
               {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
 
-            <Link to="/" className="flex items-center gap-2 sm:gap-2.5 group py-0.5" aria-label="Bharathi Store">
+            <Link to="/" className="flex items-center gap-1.5 sm:gap-2.5 group py-0.5 min-w-0" aria-label="Bharathi Store">
               {/* 3D 'B' Shopping Cart Emblem Icon */}
               <img 
                 src="/bharathi-emblem-4k.png" 
                 alt="Bharathi Store Emblem" 
-                className="h-9 sm:h-11 md:h-12 w-auto object-contain shrink-0 transition-transform duration-200 group-hover:scale-105"
+                className="h-8 sm:h-11 md:h-12 w-auto object-contain shrink-0 transition-transform duration-200 group-hover:scale-105"
                 style={{ imageRendering: '-webkit-optimize-contrast' }}
               />
 
-              {/* 4K Brand Letters */}
+              {/* 4K Brand Letters — hidden on very small screens to prevent overflow */}
               <img 
                 src="/bharathi-brand-header-4k.png" 
                 srcSet="/bharathi-brand-header-4k.png 2x, /bharathi-brand-header-4k.png 3x"
                 alt="Bharathi Store - Supermarket & Provisions" 
-                className="h-8 sm:h-10 md:h-11 w-auto max-w-[155px] sm:max-w-[185px] md:max-w-[210px] object-contain transition-transform duration-200 group-hover:scale-[1.02]"
+                className="h-7 sm:h-10 md:h-11 w-auto max-w-[110px] xs:max-w-[140px] sm:max-w-[185px] md:max-w-[210px] object-contain transition-transform duration-200 group-hover:scale-[1.02]"
                 style={{ imageRendering: '-webkit-optimize-contrast' }}
               />
             </Link>
@@ -748,46 +748,56 @@ export const Header: React.FC = () => {
             )}
           </div>
 
-          {/* Right Micro Actions (Location, Wishlist, Account, Basket) */}
-          <div className="flex items-center gap-1.5 sm:gap-3 shrink-0">
-            {/* Customer delivery address pin indicator (Mobile & Desktop) */}
+          {/* Right Micro Actions — simplified on mobile to prevent overflow at 320-375px */}
+          <div className="flex items-center gap-1 sm:gap-2 md:gap-3 shrink-0 animate-entrance-basket">
+
+            {/* Mobile search icon button — opens the full-screen search overlay */}
+            <button
+              onClick={() => setIsMobileSearchOpen(true)}
+              className="sm:hidden p-2 text-stone-700 hover:text-brand-crimson hover:bg-stone-100 rounded-full transition-colors"
+              aria-label="Open search"
+            >
+              <Search className="w-5 h-5" />
+            </button>
+
+            {/* Customer delivery address pin indicator — hidden on narrow mobile, shown sm+ */}
             <button
               onClick={() => setIsLocationModalOpen(true)}
-              className="flex items-center gap-1.5 text-xs text-stone-700 bg-red-50/80 hover:bg-red-100/80 px-2.5 py-1.5 rounded-full border border-red-200/80 font-medium transition-colors shrink-0 active:scale-95 animate-entrance-location"
+              className="hidden sm:flex items-center gap-1.5 text-xs text-stone-700 bg-red-50/80 hover:bg-red-100/80 px-2.5 py-1.5 rounded-full border border-red-200/80 font-medium transition-colors shrink-0 active:scale-95 animate-entrance-location"
               aria-label="Customer delivery address"
               title="Click to select or manage customer delivery address"
             >
               <MapPin className="w-3.5 h-3.5 text-brand-crimson shrink-0" />
               <div className="flex items-center gap-1 text-left">
                 <span className="text-[10px] font-bold text-stone-500 hidden md:inline">Deliver to:</span>
-                <span className="text-[11px] font-bold text-brand-crimson truncate max-w-[85px] xs:max-w-[120px] sm:max-w-[170px]">
+                <span className="text-[11px] font-bold text-brand-crimson truncate max-w-[120px] sm:max-w-[170px]">
                   {activeAddress ? `${activeAddress.label || 'Home'} · ${activeAddress.streetAddress.split(',')[0]}` : 'Customer Address'}
                 </span>
               </div>
             </button>
 
-            {/* Wishlist with Pulse micro-interaction */}
+            {/* Wishlist — hidden on mobile (accessible via /wishlist in account) */}
             <Link
               to="/wishlist"
               onClick={handleWishlistClick}
               className={cn(
-                "relative p-2 text-stone-700 hover:text-brand-crimson hover:bg-stone-100 rounded-full transition-colors animate-entrance-wishlist",
+                "relative p-2 text-stone-700 hover:text-brand-crimson hover:bg-stone-100 rounded-full transition-colors animate-entrance-wishlist hidden sm:flex",
                 isWishlistPulsing && "animate-heart-pulse text-brand-crimson"
               )}
               aria-label={`Wishlist with ${wishlist.length} items`}
             >
               <Heart className={cn("w-5 h-5 transition-colors", wishlist.length > 0 ? "fill-brand-crimson text-brand-crimson" : "")} />
               {wishlist.length > 0 && (
-                <span className="absolute top-1 right-1 w-3.5 h-3.5 bg-brand-crimson text-white text-[9px] font-bold rounded-full flex items-center justify-center animate-scale-in">
+                <span className="absolute top-1 right-1 w-3.5 h-3.5 bg-brand-crimson text-white text-[9px] font-bold rounded-full flex items-center justify-center">
                   {wishlist.length}
                 </span>
               )}
             </Link>
 
-            {/* User Account */}
+            {/* User Account — hidden on mobile (accessible via MobileNav) */}
             <button
               onClick={() => user ? navigate('/account') : setIsAuthModalOpen(true)}
-              className="flex items-center gap-1.5 p-2 text-stone-700 hover:text-brand-crimson hover:bg-stone-100 rounded-full transition-colors text-xs font-medium animate-entrance-account"
+              className="hidden sm:flex items-center gap-1.5 p-2 text-stone-700 hover:text-brand-crimson hover:bg-stone-100 rounded-full transition-colors text-xs font-medium animate-entrance-account"
               aria-label="User account"
             >
               <User className="w-5 h-5" />
@@ -800,7 +810,7 @@ export const Header: React.FC = () => {
             <button
               onClick={() => setIsCartOpen(true)}
               className={cn(
-                "flex items-center gap-2 bg-stone-900 hover:bg-brand-crimson text-white px-3.5 sm:px-4 py-2 rounded-full text-xs font-semibold shadow-xs transition-all duration-200 active:scale-95 animate-entrance-basket",
+                "flex items-center gap-1.5 sm:gap-2 bg-stone-900 hover:bg-brand-crimson text-white px-3 sm:px-4 py-2 rounded-full text-xs font-semibold shadow-xs transition-all duration-200 active:scale-95",
                 cartBounce && "animate-cart-bounce"
               )}
               aria-label={`Basket with ${cartCount} items`}

@@ -106,19 +106,19 @@ export const ProductsPage: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3 self-stretch sm:self-auto w-full sm:w-auto">
-            {/* Mobile Filter Trigger */}
+            {/* Mobile/Tablet Filter Trigger */}
             <button
               onClick={() => setIsMobileFilterOpen(true)}
-              className="lg:hidden flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-4 py-2.5 bg-white border border-stone-200 rounded-full text-xs font-semibold text-stone-800 shadow-2xs active:scale-95 transition-all min-h-[44px]"
+              className="md:hidden flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-4 py-2.5 bg-white border border-stone-200 rounded-full text-xs font-semibold text-stone-800 shadow-2xs active:scale-95 transition-all min-h-[44px]"
             >
               <SlidersHorizontal className="w-4 h-4 text-brand-crimson" />
               <span>Filters {hasActiveFilters && '• Active'}</span>
             </button>
 
-            {/* Mobile Sort Trigger */}
+            {/* Mobile/Tablet Sort Trigger */}
             <button
               onClick={() => setIsMobileSortOpen(true)}
-              className="lg:hidden flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-4 py-2.5 bg-white border border-stone-200 rounded-full text-xs font-semibold text-stone-800 shadow-2xs active:scale-95 transition-all min-h-[44px]"
+              className="md:hidden flex-1 sm:flex-initial flex items-center justify-center gap-1.5 px-4 py-2.5 bg-white border border-stone-200 rounded-full text-xs font-semibold text-stone-800 shadow-2xs active:scale-95 transition-all min-h-[44px]"
             >
               <span className="text-stone-500 font-normal">Sort:</span>
               <span className="truncate max-w-[100px]">
@@ -127,7 +127,7 @@ export const ProductsPage: React.FC = () => {
             </button>
 
             {/* Desktop Sort Dropdown */}
-            <div className="hidden lg:flex items-center gap-2 bg-white border border-surface-border rounded-full px-3.5 py-2 shadow-xs text-xs">
+            <div className="hidden md:flex items-center gap-2 bg-white border border-surface-border rounded-full px-3.5 py-2 shadow-xs text-xs">
               <span className="text-muted text-[11px] font-medium">Sort:</span>
               <select
                 value={sortBy}
@@ -190,9 +190,9 @@ export const ProductsPage: React.FC = () => {
       </div>
 
       {/* Main Grid with Open Airy Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Desktop Sidebar (Minimal line aesthetic, not heavy box) */}
-        <aside className="hidden lg:block lg:col-span-3 space-y-6 sticky top-28">
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 md:gap-8 items-start">
+        {/* Sidebar — visible from md (tablet) up */}
+        <aside className="hidden md:block md:col-span-3 space-y-6 sticky top-28">
           <div className="pb-3 border-b border-surface-border flex items-center justify-between">
             <h2 className="text-xs font-bold uppercase tracking-wider text-obsidian flex items-center gap-1.5">
               <Filter className="w-3.5 h-3.5 text-brand-crimson" />
@@ -285,7 +285,7 @@ export const ProductsPage: React.FC = () => {
         </aside>
 
         {/* Product Grid Area */}
-        <div className="lg:col-span-9 space-y-8">
+        <div className="md:col-span-9 space-y-8">
           {paginatedProducts.length === 0 ? (
             <div className="rounded-3xl border border-surface-border bg-white p-16 text-center space-y-4 shadow-subtle max-w-md mx-auto">
               <div className="w-16 h-16 rounded-full bg-stone-100 flex items-center justify-center text-stone-400 mx-auto">
@@ -304,7 +304,7 @@ export const ProductsPage: React.FC = () => {
             </div>
           ) : (
             <>
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
+            <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-5">
                 {paginatedProducts.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}

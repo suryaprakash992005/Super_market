@@ -80,8 +80,81 @@ export const AdminOrders: React.FC = () => {
         </select>
       </div>
 
-      {/* Orders Table */}
-      <div className="bg-white rounded-2xl border border-surface-border overflow-hidden shadow-subtle">
+      {/* Orders — Mobile Card View (< md) */}
+      <div className="md:hidden space-y-3">
+        {filteredOrders.length === 0 ? (
+          <div className="bg-white rounded-2xl border border-surface-border p-8 text-center">
+            <ShoppingBag className="w-10 h-10 text-stone-300 mx-auto mb-2" />
+            <p className="text-xs font-semibold text-muted">No orders match your filters</p>
+          </div>
+        ) : (
+          filteredOrders.map((order) => (
+            <div key={order.id} className="bg-white rounded-2xl border border-surface-border shadow-subtle p-4 space-y-3">
+              {/* Header row */}
+              <div className="flex items-start justify-between gap-2">
+                <div>
+                  <span className="font-bold text-obsidian text-sm">#{order.orderNumber}</span>
+                  <p className="text-[11px] text-muted mt-0.5">{formatDate(order.createdAt)}</p>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={() => setReceiptModalOrder(order)}
+                    className="px-2 py-1 bg-red-50 hover:bg-red-100 text-brand-crimson border border-red-200/80 rounded-lg text-[11px] font-bold flex items-center gap-1 transition-colors"
+                    title="View bill"
+                  >
+                    <FileText className="w-3 h-3" />
+                    <span>Bill</span>
+                  </button>
+                  <button
+                    onClick={() => setSelectedOrder(order)}
+                    className="px-2 py-1 bg-stone-100 hover:bg-stone-200 text-stone-800 rounded-lg text-[11px] font-semibold flex items-center gap-1"
+                  >
+                    <Eye className="w-3 h-3" />
+                    <span>View</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Customer + fulfillment */}
+              <div className="flex items-center justify-between text-xs border-t border-surface-border pt-2">
+                <div>
+                  <p className="font-semibold text-obsidian">{order.customerName}</p>
+                  <p className="text-[11px] text-muted">{order.customerPhone}</p>
+                </div>
+                <div className="text-right">
+                  <p className="font-bold text-obsidian">{formatCurrency(order.total)}</p>
+                  <span className={`text-[10px] font-semibold uppercase ${order.paymentStatus === 'paid' ? 'text-supermarket-fresh' : 'text-amber-700'}`}>
+                    {order.paymentMethod} • {order.paymentStatus}
+                  </span>
+                </div>
+              </div>
+
+              {/* Status selector */}
+              <div className="flex items-center justify-between gap-2 border-t border-surface-border pt-2">
+                <span className="text-[11px] font-semibold text-stone-600">Status:</span>
+                <select
+                  value={order.status}
+                  onChange={(e) => updateOrderStatus(order.id, e.target.value as OrderStatus)}
+                  className={`text-[11px] font-bold uppercase px-2.5 py-1.5 rounded-lg border cursor-pointer flex-1 max-w-[180px] ${
+                    order.status === 'delivered'
+                      ? 'bg-green-50 text-supermarket-fresh border-green-200'
+                      : order.status === 'cancelled'
+                      ? 'bg-red-50 text-red-700 border-red-200'
+                      : 'bg-amber-50 text-amber-800 border-amber-200'
+                  }`}
+                >
+                  {allStatuses.map((s) => (
+                    <option key={s.key} value={s.key}>{s.label}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* Orders — Desktop Table View (md+) */}
+      <div className="hidden md:block bg-white rounded-2xl border border-surface-border overflow-hidden shadow-subtle">
         <div className="overflow-x-auto">
           <table className="w-full text-xs text-left">
             <thead>
@@ -124,7 +197,7 @@ export const AdminOrders: React.FC = () => {
                       value={order.status}
                       onChange={(e) => updateOrderStatus(order.id, e.target.value as OrderStatus)}
                       className={`text-[11px] font-bold uppercase px-2.5 py-1 rounded-lg border cursor-pointer ${
-                        order.status === 'delivered' 
+                        order.status === 'delivered'
                           ? 'bg-green-50 text-supermarket-fresh border-green-200'
                           : order.status === 'cancelled'
                           ? 'bg-red-50 text-red-700 border-red-200'
@@ -161,6 +234,7 @@ export const AdminOrders: React.FC = () => {
           </table>
         </div>
       </div>
+
 
       {/* Inspect Order Drawer / Modal */}
       {selectedOrder && (
