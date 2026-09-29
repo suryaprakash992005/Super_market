@@ -72,14 +72,14 @@ export const CartPage: React.FC = () => {
   }
 
   return (
-    <div className="max-w-7xl mx-auto px-3 sm:px-4 py-6 sm:py-8 space-y-5 sm:space-y-8">
+    <div className="max-w-7xl mx-auto px-4 py-8 space-y-8">
       {/* Title */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-surface-border pb-4">
         <div>
-          <h1 className="font-serif text-xl sm:text-3xl font-bold text-obsidian">
-            Basket ({cart.reduce((s, i) => s + i.quantity, 0)} items)
+          <h1 className="font-serif text-2xl sm:text-3xl font-bold text-obsidian">
+            Shopping Basket ({cart.reduce((s, i) => s + i.quantity, 0)} items)
           </h1>
-          <p className="text-xs text-muted mt-0.5 hidden sm:block">
+          <p className="text-xs text-muted mt-0.5">
             Review your items and proceed to choose doorstep delivery or store pickup.
           </p>
         </div>
@@ -87,94 +87,90 @@ export const CartPage: React.FC = () => {
           onClick={clearCart}
           className="text-xs text-red-600 hover:underline self-start sm:self-auto font-medium"
         >
-          Clear Basket
+          Empty Entire Basket
         </button>
       </div>
 
-      {/* Free Delivery Progress Bar */}
-      <div className="bg-brand-crimson-tint p-3.5 sm:p-4 rounded-xl border border-brand-crimson/20 space-y-2">
-        <div className="flex items-center justify-between text-xs font-semibold text-brand-crimson gap-2">
-          <div className="flex items-center gap-2 min-w-0">
-            <Truck className="w-4 h-4 shrink-0" />
-            <span className="truncate">
+      {/* Free Delivery Bar */}
+      <div className="bg-brand-crimson-tint p-4 rounded-xl border border-brand-crimson/20 space-y-2">
+        <div className="flex items-center justify-between text-xs font-semibold text-brand-crimson">
+          <div className="flex items-center gap-2">
+            <Truck className="w-4 h-4" />
+            <span>
               {amountNeededForFreeDelivery > 0
-                ? `Add ${formatCurrency(amountNeededForFreeDelivery)} for FREE Delivery!`
-                : 'FREE Delivery Unlocked! 🎉'}
+                ? `Add ${formatCurrency(amountNeededForFreeDelivery)} more to qualify for FREE Delivery!`
+                : "Congratulations! You have unlocked FREE Supermarket Doorstep Delivery."}
             </span>
           </div>
-          <span className="shrink-0">{freeDeliveryProgress}%</span>
+          <span>{freeDeliveryProgress}%</span>
         </div>
         <div className="w-full bg-brand-crimson/20 h-2 rounded-full overflow-hidden">
-          <div
+          <div 
             className="bg-brand-crimson h-full rounded-full transition-all duration-300"
             style={{ width: `${freeDeliveryProgress}%` }}
           />
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-8 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Left: Items List */}
         <div className="lg:col-span-8 bg-white rounded-2xl border border-surface-border overflow-hidden shadow-subtle divide-y divide-surface-border">
           {cart.map((item) => (
-            <div key={item.product.id} className="p-3.5 sm:p-5 flex items-start gap-3 sm:gap-4">
-              {/* Image */}
-              <img
-                src={item.product.images[0]}
-                alt={item.product.name}
-                className="w-16 h-16 sm:w-20 sm:h-20 rounded-xl object-cover border border-surface-border shrink-0 bg-stone-50"
-              />
-
-              {/* Info + Controls */}
-              <div className="flex-1 min-w-0 flex flex-col gap-2">
-                {/* Top: name + remove */}
-                <div className="flex items-start justify-between gap-2">
-                  <Link
+            <div key={item.product.id} className="p-4 sm:p-5 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+              <div className="flex gap-4 items-center flex-1 min-w-0">
+                <img
+                  src={item.product.images[0]}
+                  alt={item.product.name}
+                  className="w-20 h-20 rounded-xl object-cover border border-surface-border shrink-0 bg-stone-50"
+                />
+                <div className="space-y-1 min-w-0">
+                  <Link 
                     to={`/product/${item.product.slug || item.product.id}`}
-                    className="font-semibold text-xs sm:text-sm text-obsidian hover:text-brand-crimson transition-colors leading-snug line-clamp-2"
+                    className="font-semibold text-sm text-obsidian hover:text-brand-crimson transition-colors block truncate"
                   >
                     {item.product.name}
                   </Link>
+                  <p className="text-xs text-muted">
+                    Unit: <span className="text-stone-700 font-medium">{item.product.unit}</span>
+                  </p>
+                  <p className="text-xs text-stone-600">
+                    {formatCurrency(item.product.price)} each
+                  </p>
+                </div>
+              </div>
+
+              {/* Stepper and Subtotal */}
+              <div className="flex items-center justify-between sm:justify-end gap-6 w-full sm:w-auto pt-2 sm:pt-0 border-t sm:border-t-0 border-surface-border/60">
+                <div className="flex items-center border border-surface-border-strong rounded-lg bg-stone-50 overflow-hidden">
                   <button
-                    onClick={() => removeFromCart(item.product.id)}
-                    className="text-stone-400 hover:text-red-600 transition-colors p-1 -mt-0.5 shrink-0"
-                    aria-label="Remove item"
+                    onClick={() => updateCartQuantity(item.product.id, item.quantity - 1)}
+                    className="w-8 h-8 flex items-center justify-center text-stone-700 hover:bg-stone-200"
+                    aria-label="Decrease"
                   >
-                    <X className="w-4 h-4" />
+                    <Minus className="w-3.5 h-3.5" />
+                  </button>
+                  <span className="w-8 text-center text-xs font-bold text-obsidian">
+                    {item.quantity}
+                  </span>
+                  <button
+                    onClick={() => updateCartQuantity(item.product.id, item.quantity + 1)}
+                    className="w-8 h-8 flex items-center justify-center text-stone-700 hover:bg-stone-200"
+                    aria-label="Increase"
+                  >
+                    <Plus className="w-3.5 h-3.5" />
                   </button>
                 </div>
 
-                {/* Unit */}
-                <p className="text-[11px] text-muted">
-                  {item.product.unit} · {formatCurrency(item.product.price)} each
-                </p>
-
-                {/* Bottom: stepper + line total */}
-                <div className="flex items-center justify-between gap-3">
-                  {/* Stepper */}
-                  <div className="flex items-center border border-surface-border-strong rounded-lg bg-stone-50 overflow-hidden">
-                    <button
-                      onClick={() => updateCartQuantity(item.product.id, item.quantity - 1)}
-                      className="w-8 h-8 flex items-center justify-center text-stone-700 hover:bg-stone-200 active:scale-90"
-                      aria-label="Decrease"
-                    >
-                      <Minus className="w-3.5 h-3.5" />
-                    </button>
-                    <span className="w-8 text-center text-xs font-bold text-obsidian">
-                      {item.quantity}
-                    </span>
-                    <button
-                      onClick={() => updateCartQuantity(item.product.id, item.quantity + 1)}
-                      className="w-8 h-8 flex items-center justify-center text-stone-700 hover:bg-stone-200 active:scale-90"
-                      aria-label="Increase"
-                    >
-                      <Plus className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-
-                  {/* Line total */}
-                  <span className="font-bold text-sm text-obsidian">
+                <div className="text-right min-w-[80px]">
+                  <span className="font-bold text-sm text-obsidian block">
                     {formatCurrency(item.product.price * item.quantity)}
                   </span>
+                  <button
+                    onClick={() => removeFromCart(item.product.id)}
+                    className="text-[11px] text-stone-400 hover:text-red-600 transition-colors mt-0.5"
+                  >
+                    Remove
+                  </button>
                 </div>
               </div>
             </div>

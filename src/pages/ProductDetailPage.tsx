@@ -91,7 +91,7 @@ export const ProductDetailPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-5 sm:py-8 space-y-8 sm:space-y-16 font-sans pb-28 md:pb-16">
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 space-y-10 sm:space-y-16 font-sans pb-36 md:pb-16">
       {/* Breadcrumbs */}
       <div className="flex items-center gap-1.5 sm:gap-2 text-[11px] sm:text-xs text-muted overflow-x-auto no-scrollbar py-1">
         <Link to="/" className="hover:text-brand-crimson shrink-0">Home</Link>
@@ -192,7 +192,7 @@ export const ProductDetailPage: React.FC = () => {
               </span>
             </div>
 
-            <h1 className="font-serif text-2xl sm:text-4xl font-bold text-obsidian tracking-tight leading-tight">
+            <h1 className="font-serif text-3xl sm:text-4xl font-bold text-obsidian tracking-tight leading-tight">
               {product.name}
             </h1>
 
@@ -213,8 +213,8 @@ export const ProductDetailPage: React.FC = () => {
 
           {/* Pricing display */}
           <div className="pt-2 border-t border-surface-border">
-            <div className="flex items-baseline gap-2 sm:gap-3 flex-wrap">
-              <span className="font-serif text-2xl sm:text-4xl font-bold text-obsidian">
+            <div className="flex items-baseline gap-3">
+              <span className="font-serif text-3xl sm:text-4xl font-bold text-obsidian">
                 {formatCurrency(product.price)}
               </span>
               {product.mrp > product.price && (
@@ -282,12 +282,12 @@ export const ProductDetailPage: React.FC = () => {
 
           {/* Purchase Actions */}
           <div className="space-y-4 pt-2">
-            <div className="flex flex-wrap items-center gap-3">
-              <span className="text-xs font-semibold text-stone-700 shrink-0">Quantity:</span>
+            <div className="flex items-center gap-4">
+              <span className="text-xs font-semibold text-stone-700">Select Quantity:</span>
               <div className="flex items-center border border-surface-border rounded-full bg-white overflow-hidden shadow-xs">
                 <button
                   onClick={() => setQuantity(q => Math.max(1, q - 1))}
-                  className="w-9 h-9 flex items-center justify-center text-stone-700 hover:bg-stone-100 active:scale-90"
+                  className="w-8 h-8 flex items-center justify-center text-stone-700 hover:bg-stone-100"
                 >
                   <Minus className="w-3.5 h-3.5" />
                 </button>
@@ -296,17 +296,17 @@ export const ProductDetailPage: React.FC = () => {
                 </span>
                 <button
                   onClick={() => setQuantity(q => Math.min(product.stockQuantity, q + 1))}
-                  className="w-9 h-9 flex items-center justify-center text-stone-700 hover:bg-stone-100 active:scale-90"
+                  className="w-8 h-8 flex items-center justify-center text-stone-700 hover:bg-stone-100"
                 >
                   <Plus className="w-3.5 h-3.5" />
                 </button>
               </div>
               <span className="text-xs text-stone-500">
-                Total: <strong className="text-obsidian">{formatCurrency(product.price * quantity)}</strong>
+                Item Total: <strong className="text-obsidian">{formatCurrency(product.price * quantity)}</strong>
               </span>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <button
                 onClick={handleAddToCart}
                 disabled={!product.inStock}
