@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, ArrowRight, Sparkles, Leaf } from 'lucide-react';
 import { Banner } from '../../types';
 import { cn } from '../../lib/utils';
+import { prefersReducedMotion } from '../../lib/motion';
 import { InfiniteSpiral, SpiralItem } from './InfiniteSpiral';
 
 interface HeroBannerCarouselProps {
@@ -120,7 +121,7 @@ export const HeroBannerCarousel: React.FC<HeroBannerCarouselProps> = ({
 
   // Auto-advance with requestAnimationFrame for smooth progress
   useEffect(() => {
-    if (isPaused || isTransitioning || total <= 1) return;
+    if (isPaused || isTransitioning || total <= 1 || prefersReducedMotion()) return;
 
     const tick = (timestamp: number) => {
       if (lastTickRef.current === null) lastTickRef.current = timestamp;

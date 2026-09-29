@@ -13,6 +13,7 @@ import {
   X,
   Store
 } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useStore } from '../../context/StoreContext';
 import { cn } from '../../lib/utils';
 
@@ -135,20 +136,32 @@ export const AdminLayout: React.FC = () => {
       </div>
 
       {/* ── Mobile Sidebar Drawer ── */}
-      {isMobileSidebarOpen && (
-        <>
-          {/* Backdrop */}
-          <div
-            className="md:hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-xs"
-            onClick={() => setIsMobileSidebarOpen(false)}
-            aria-hidden="true"
-          />
-          {/* Drawer */}
-          <aside className="md:hidden fixed inset-y-0 left-0 z-50 w-72 bg-obsidian text-stone-300 flex flex-col justify-between shadow-2xl animate-sheet-up overflow-y-auto">
-            <SidebarContent />
-          </aside>
-        </>
-      )}
+      <AnimatePresence>
+        {isMobileSidebarOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="md:hidden fixed inset-0 z-40 bg-black/60 backdrop-blur-xs"
+              onClick={() => setIsMobileSidebarOpen(false)}
+              aria-hidden="true"
+            />
+            {/* Drawer */}
+            <motion.aside 
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              className="md:hidden fixed inset-y-0 left-0 z-50 w-72 bg-obsidian text-stone-300 flex flex-col justify-between shadow-2xl overflow-y-auto"
+            >
+              <SidebarContent />
+            </motion.aside>
+          </>
+        )}
+      </AnimatePresence>
 
       {/* ── Desktop Persistent Sidebar ── */}
       <aside className="hidden md:flex md:w-64 bg-obsidian text-stone-300 flex-col justify-between shrink-0">

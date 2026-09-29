@@ -36,6 +36,7 @@ export const DeliveryVehicle: React.FC<DeliveryVehicleProps> = ({
         return { 
           badge: 'Assigned',
           title: 'Order Received', 
+          shortTitle: 'Received',
           bgColor: 'bg-stone-900/90 text-white',
           dotColor: 'bg-amber-400',
         };
@@ -43,6 +44,7 @@ export const DeliveryVehicle: React.FC<DeliveryVehicleProps> = ({
         return { 
           badge: 'Verified',
           title: 'Store Confirmed', 
+          shortTitle: 'Confirmed',
           bgColor: 'bg-stone-900/90 text-white',
           dotColor: 'bg-blue-400',
         };
@@ -50,6 +52,7 @@ export const DeliveryVehicle: React.FC<DeliveryVehicleProps> = ({
         return { 
           badge: 'Sealed',
           title: isPickup ? 'Bagged for Pickup' : 'Cargo Sealed & Loaded', 
+          shortTitle: isPickup ? 'Bagged' : 'Packed',
           bgColor: 'bg-stone-900/90 text-white',
           dotColor: 'bg-amber-400',
         };
@@ -57,6 +60,7 @@ export const DeliveryVehicle: React.FC<DeliveryVehicleProps> = ({
         return {
           badge: 'EV Live',
           title: isPickup ? 'Ready at Counter' : 'En Route with Driver',
+          shortTitle: isPickup ? 'Ready' : 'En Route',
           bgColor: 'bg-brand-crimson text-white shadow-crimson',
           dotColor: 'bg-white',
           isLive: true,
@@ -65,6 +69,7 @@ export const DeliveryVehicle: React.FC<DeliveryVehicleProps> = ({
         return {
           badge: 'Delivered',
           title: isPickup ? 'Handed Over ✓' : 'Delivered Safely ✓',
+          shortTitle: isPickup ? 'Picked Up' : 'Delivered',
           bgColor: 'bg-emerald-700 text-white',
           dotColor: 'bg-emerald-300',
         };
@@ -72,6 +77,7 @@ export const DeliveryVehicle: React.FC<DeliveryVehicleProps> = ({
         return { 
           badge: 'Active', 
           title: 'Fulfillment Active', 
+          shortTitle: 'Active',
           bgColor: 'bg-stone-900/90 text-white', 
           dotColor: 'bg-stone-400',
         };
@@ -150,11 +156,12 @@ export const DeliveryVehicle: React.FC<DeliveryVehicleProps> = ({
     return () => ctx.revert();
   }, [isMoving]);
 
-  // Scaled dimensions: 'md' defaults to a generous 116px x 70px to show every authentic detail
+  // Scaled dimensions: on mobile view (<sm), vehicle is scaled down to ~50px x 30px so it fits cleanly between stage nodes
+  // On tablet (sm): ~88px x 53px, On desktop (md+): full 116px x 70px with authentic high-fidelity details
   const scaleClasses = {
-    sm: 'w-[88px] h-[54px]',
-    md: 'w-[116px] h-[70px]',
-    lg: 'w-[136px] h-[82px]',
+    sm: 'w-[44px] h-[26px] sm:w-[72px] sm:h-[43px] md:w-[88px] md:h-[54px]',
+    md: 'w-[50px] h-[30px] sm:w-[88px] sm:h-[53px] md:w-[116px] md:h-[70px]',
+    lg: 'w-[58px] h-[35px] sm:w-[100px] sm:h-[60px] md:w-[136px] md:h-[82px]',
   }[size];
 
   // Calculated display speed for telemetry badge
@@ -163,26 +170,27 @@ export const DeliveryVehicle: React.FC<DeliveryVehicleProps> = ({
   return (
     <div className={`relative flex flex-col items-center select-none ${className}`}>
       {/* 1. Minimalist Glassmorphic HUD Tooltip floating above the EV Scooter */}
-      <div className="absolute -top-9 sm:-top-10 left-1/2 -translate-x-1/2 whitespace-nowrap z-30 pointer-events-none transition-all duration-300">
+      <div className="absolute -top-7 sm:-top-8 md:-top-10 left-1/2 -translate-x-1/2 whitespace-nowrap z-30 pointer-events-none transition-all duration-300">
         <div
-          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold tracking-tight shadow-xl border border-white/20 backdrop-blur-md ${pill.bgColor} transition-colors duration-300`}
+          className={`flex items-center gap-1 sm:gap-1.5 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[8.5px] sm:text-[9.5px] md:text-[10px] font-bold tracking-tight shadow-xl border border-white/20 backdrop-blur-md ${pill.bgColor} transition-colors duration-300`}
         >
           {/* Animated pulsing live beacon dot */}
-          <span className="relative flex h-2 w-2">
+          <span className="relative flex h-1.5 w-1.5 sm:h-2 sm:w-2">
             {(pill.isLive || isMoving) && (
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-80" />
             )}
-            <span className={`relative inline-flex rounded-full h-2 w-2 ${pill.dotColor}`} />
+            <span className={`relative inline-flex rounded-full h-1.5 w-1.5 sm:h-2 sm:w-2 ${pill.dotColor}`} />
           </span>
 
-          <span className="text-[8.5px] uppercase tracking-wider text-white/70 font-semibold border-r border-white/20 pr-1.5">
+          <span className="text-[7.5px] sm:text-[8px] md:text-[8.5px] uppercase tracking-wider text-white/80 font-semibold border-r border-white/20 pr-1 sm:pr-1.5">
             {pill.badge}
           </span>
-          <span className="font-bold text-white tracking-tight">{pill.title}</span>
+          <span className="hidden sm:inline font-bold text-white tracking-tight">{pill.title}</span>
+          <span className="sm:hidden font-bold text-white tracking-tight">{pill.shortTitle}</span>
         </div>
 
         {/* Downward indicator triangle */}
-        <div className="w-0 h-0 border-l-[4px] border-l-transparent border-r-[4px] border-r-transparent border-t-[4px] border-t-stone-900 mx-auto -mt-[0.5px]" />
+        <div className="w-0 h-0 border-l-[3px] sm:border-l-[4px] border-l-transparent border-r-[3px] sm:border-r-[4px] border-r-transparent border-t-[3px] sm:border-t-[4px] border-t-stone-900 mx-auto -mt-[0.5px]" />
       </div>
 
       {/* 2. REALISTIC HIGH-FIDELITY EV SCOOTER SVG (Ather / Ola Fleet Edition) */}

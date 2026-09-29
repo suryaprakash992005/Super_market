@@ -18,7 +18,9 @@ import { useStore } from '../context/StoreContext';
 import { PaymentModal } from '../components/payment/PaymentModal';
 import { DeliveryAddress, FulfillmentMethod, PaymentMethod, Order } from '../types';
 import { formatCurrency, generateOrderNumber } from '../lib/utils';
+import { prefersReducedMotion } from '../lib/motion';
 import { ShopReceiptModal } from '../components/receipt/ShopReceiptModal';
+import confetti from 'canvas-confetti';
 
 export const CheckoutPage: React.FC = () => {
   const navigate = useNavigate();
@@ -90,6 +92,19 @@ export const CheckoutPage: React.FC = () => {
 
       setConfirmedOrder(order);
       setIsSubmitting(false);
+
+      try {
+        if (!prefersReducedMotion()) {
+          confetti({
+            particleCount: 70,
+            spread: 60,
+            origin: { y: 0.65 },
+            colors: ['#C8102E', '#9E0C24', '#10B981', '#F59E0B'],
+          });
+        }
+      } catch {
+        // ignore
+      }
     } catch (err: any) {
       setFormError('An error occurred while creating your order. Please try again.');
       setIsSubmitting(false);
