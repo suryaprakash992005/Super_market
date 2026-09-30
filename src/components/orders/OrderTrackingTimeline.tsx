@@ -434,13 +434,12 @@ export const OrderTrackingTimeline: React.FC<OrderTrackingTimelineProps> = ({
             {isPickup ? (
               <>
                 <Store className="w-3.5 h-3.5 text-brand-crimson" />
-                <span>Store Pickup</span>
+                <span>Store Pickup (Click &amp; Collect)</span>
               </>
             ) : (
               <>
                 <Truck className="w-3.5 h-3.5 text-brand-crimson" />
-                <span className="hidden xs:inline">100% Electric Doorstep Delivery</span>
-                <span className="xs:hidden">100% Electric EV</span>
+                <span>100% Electric Doorstep Delivery</span>
               </>
             )}
           </div>
@@ -466,7 +465,7 @@ export const OrderTrackingTimeline: React.FC<OrderTrackingTimelineProps> = ({
       )}
 
       {/* 2. Interactive Route & Real EV Scooter Area */}
-      <div className="relative pt-10 sm:pt-14 pb-5 px-1 sm:px-6" ref={containerRef}>
+      <div className="relative pt-12 pb-5 px-1 sm:px-6" ref={containerRef}>
         {/* SVG Route Lines connecting stages with Electric Laser Beam */}
         <svg
           className="absolute inset-0 w-full h-full pointer-events-none z-0"
@@ -581,20 +580,18 @@ export const OrderTrackingTimeline: React.FC<OrderTrackingTimelineProps> = ({
           ref={vehicleWrapperRef}
           className="absolute z-20 pointer-events-none transition-opacity duration-300"
           style={{
-            top: `${routeCoordinates.y}px`,
+            top: `${routeCoordinates.y - 64}px`,
             left: '0px',
             transform: `translate3d(${vehicleX}px, 0, 0) translateX(-50%)`,
             opacity: routeCoordinates.startX > 0 ? 1 : 0,
           }}
         >
-          <div style={{ transform: 'translateY(-91.7%)' }}>
-            <DeliveryVehicle
-              status={stages[displayStepIndex]?.key || order.status}
-              fulfillmentMethod={order.fulfillmentMethod}
-              isMoving={isMoving}
-              size="md"
-            />
-          </div>
+          <DeliveryVehicle
+            status={stages[displayStepIndex]?.key || order.status}
+            fulfillmentMethod={order.fulfillmentMethod}
+            isMoving={isMoving}
+            size="md"
+          />
         </div>
 
         {/* 4. The 5 Stage Nodes */}

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Heart, Plus, Minus, Check, Star, Eye } from 'lucide-react';
-import { motion } from 'framer-motion';
 import { Product } from '../../types';
 import { useStore } from '../../context/StoreContext';
 import { formatCurrency, calculateDiscount, cn } from '../../lib/utils';
@@ -66,10 +65,9 @@ export const ProductCard: React.FC<ProductCardProps> = ({
   };
 
   return (
-    <motion.div 
-      whileHover={{ y: -3, transition: { duration: 0.2, ease: [0.16, 1, 0.3, 1] } }}
+    <div 
       className={cn(
-        "group relative flex flex-col justify-between transition-shadow duration-300 select-none",
+        "group relative flex flex-col justify-between transition-all duration-300 select-none",
         // Clean frameless open design, removing rigid box borders, touch-optimized
         "bg-white rounded-2xl p-2.5 sm:p-3.5 border border-surface-border/50 hover:border-surface-border hover:shadow-card shadow-2xs",
         !product.inStock && "opacity-70 grayscale-[30%]",
@@ -238,6 +236,6 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           </div>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 };
