@@ -18,6 +18,7 @@ import {
 import { useStore } from '../context/StoreContext';
 import { ProductCard } from '../components/common/ProductCard';
 import { HeroBannerCarousel, MobileHeroBannerCarousel } from '../components/common/HeroBannerCarousel';
+import { BrandIntro } from '../components/common/BrandIntro';
 import { cn } from '../lib/utils';
 
 const SectionHeader: React.FC<{
@@ -126,6 +127,8 @@ export const HomePage: React.FC = () => {
 
   return (
     <div className='font-sans selection:bg-brand-crimson selection:text-white bg-[#F7F5F1]'>
+      {/* Cinematic Brand Intro (Plays only once on first session visit, unmounts smoothly) */}
+      <BrandIntro />
 
       {/* ═════════════════════════════════════════════════════════ */}
       {/* ══ MOBILE HOME EXPERIENCE (< md)                       ══ */}
