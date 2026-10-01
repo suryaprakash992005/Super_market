@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { 
   Product, 
+  ProductVariant,
   Category, 
   CartItem, 
   Order, 
@@ -35,12 +36,20 @@ interface StoreContextType {
   updateCategory: (id: string, updates: Partial<Category>) => void;
   updateSettings: (updates: Partial<SupermarketSettings>) => void;
   
+  // Category Hierarchy Helpers
+  getMainCategories: () => Category[];
+  getSubcategories: (parentIdOrSlug: string) => Category[];
+  getCategoryBySlug: (slug: string) => Category | undefined;
+  getParentCategory: (slugOrId: string) => Category | undefined;
+  getAllCategoriesFlat: () => Category[];
+  searchCategories: (query: string) => Category[];
+
   // Cart
   cart: CartItem[];
-  addToCart: (product: Product, quantity?: number, notes?: string) => void;
-  removeFromCart: (productId: string) => void;
-  updateCartQuantity: (productId: string, quantity: number) => void;
-  updateCartNotes: (productId: string, notes: string) => void;
+  addToCart: (product: Product, quantity?: number, notes?: string, selectedVariant?: ProductVariant) => void;
+  removeFromCart: (productId: string, variantId?: string) => void;
+  updateCartQuantity: (productId: string, quantity: number, variantId?: string) => void;
+  updateCartNotes: (productId: string, notes: string, variantId?: string) => void;
   clearCart: () => void;
   cartCount: number;
   cartSubtotal: number;
@@ -118,13 +127,33 @@ const LOCAL_STORAGE_KEYS = {
 export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // 1. Catalog State
   const [products, setProducts] = useState<Product[]>(() => {
-    const saved = localStorage.getItem(LOCAL_STORAGE_KEYS.PRODUCTS);
-    return saved ? JSON.parse(saved) : INITIAL_PRODUCTS;
+    try {
+      const saved = localStorage.getItem(LOCAL_STORAGE_KEYS.PRODUCTS);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0 && parsed[0]?.variants) {
+          return parsed;
+        }
+      }
+    } catch {
+      // fallback
+    }
+    return INITIAL_PRODUCTS;
   });
 
   const [categories, setCategories] = useState<Category[]>(() => {
-    const saved = localStorage.getItem(LOCAL_STORAGE_KEYS.CATEGORIES);
-    return saved ? JSON.parse(saved) : INITIAL_CATEGORIES;
+    try {
+      const saved = localStorage.getItem(LOCAL_STORAGE_KEYS.CATEGORIES);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length >= 25) {
+          return parsed;
+        }
+      }
+    } catch {
+      // fallback
+    }
+    return INITIAL_CATEGORIES;
   });
 
   const [banners] = useState<Banner[]>(() => {
@@ -268,9 +297,75 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     localStorage.setItem(LOCAL_STORAGE_KEYS.IS_ADMIN, JSON.stringify(isAdmin));
   }, [isAdmin]);
 
+  // Category Hierarchy Helpers
+  const getMainCategories = () => {
+    return categories
+      .filter(c => !c.parentId && c.isActive !== false)
+      .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+  };
+
+  const getSubcategories = (parentIdOrSlug: string) => {
+    const parent = categories.find(c => c.id === parentIdOrSlug || c.slug === parentIdOrSlug);
+    if (!parent) return [];
+    if (parent.subcategories && parent.subcategories.length > 0) {
+      return parent.subcategories.filter(s => s.isActive !== false);
+    }
+    return categories.filter(c => c.parentId === parent.id && c.isActive !== false);
+  };
+
+  const getCategoryBySlug = (slug: string) => {
+    const main = categories.find(c => c.slug === slug);
+    if (main) return main;
+    for (const cat of categories) {
+      if (cat.subcategories) {
+        const sub = cat.subcategories.find(s => s.slug === slug);
+        if (sub) return sub;
+      }
+    }
+    return undefined;
+  };
+
+  const getParentCategory = (slugOrId: string) => {
+    for (const cat of categories) {
+      if (cat.subcategories?.some(s => s.slug === slugOrId || s.id === slugOrId)) {
+        return cat;
+      }
+    }
+    const target = categories.find(c => c.slug === slugOrId || c.id === slugOrId);
+    if (target?.parentId) {
+      return categories.find(c => c.id === target.parentId);
+    }
+    return undefined;
+  };
+
+  const getAllCategoriesFlat = () => {
+    const all: Category[] = [];
+    categories.forEach(cat => {
+      all.push(cat);
+      if (cat.subcategories) {
+        all.push(...cat.subcategories);
+      }
+    });
+    return all;
+  };
+
+  const searchCategories = (query: string) => {
+    const q = query.trim().toLowerCase();
+    if (!q) return [];
+    const flat = getAllCategoriesFlat();
+    return flat.filter(c => 
+      c.name.toLowerCase().includes(q) || 
+      (c.description && c.description.toLowerCase().includes(q)) ||
+      c.slug.toLowerCase().includes(q)
+    );
+  };
+
   // Cart Calculations
   const cartCount = cart.reduce((total, item) => total + item.quantity, 0);
-  const cartSubtotal = cart.reduce((sum, item) => sum + (item.product.price * item.quantity), 0);
+  const cartSubtotal = cart.reduce((sum, item) => {
+    const price = item.selectedVariant ? item.selectedVariant.price : item.product.price;
+    return sum + (price * item.quantity);
+  }, 0);
   const freeDeliveryThreshold = settings.minOrderForFreeDelivery;
   const isFreeDelivery = cartSubtotal >= freeDeliveryThreshold || cartSubtotal === 0;
   const deliveryFee = isFreeDelivery ? 0 : settings.standardDeliveryFee;
@@ -278,17 +373,20 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const cartTotal = Math.max(0, cartSubtotal + deliveryFee - couponDiscount);
 
   // Cart Actions
-  const addToCart = (product: Product, quantity: number = 1, notes?: string) => {
+  const addToCart = (product: Product, quantity: number = 1, notes?: string, selectedVariant?: ProductVariant) => {
     setCart(prevCart => {
-      const existing = prevCart.find(item => item.product.id === product.id);
+      const existing = prevCart.find(item => 
+        item.product.id === product.id && 
+        (selectedVariant ? item.selectedVariant?.id === selectedVariant.id : !item.selectedVariant)
+      );
       if (existing) {
         return prevCart.map(item => 
-          item.product.id === product.id 
+          item === existing
             ? { ...item, quantity: item.quantity + quantity, notes: notes || item.notes }
             : item
         );
       }
-      return [...prevCart, { product, quantity, notes }];
+      return [...prevCart, { product, quantity, selectedVariant, notes }];
     });
 
     // Trigger micro-interaction animation
@@ -297,24 +395,35 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setTimeout(() => setCartBounce(false), 500);
   };
 
-  const removeFromCart = (productId: string) => {
-    setCart(prev => prev.filter(item => item.product.id !== productId));
+  const removeFromCart = (productId: string, variantId?: string) => {
+    setCart(prev => prev.filter(item => {
+      if (variantId) {
+        return !(item.product.id === productId && item.selectedVariant?.id === variantId);
+      }
+      return item.product.id !== productId;
+    }));
   };
 
-  const updateCartQuantity = (productId: string, quantity: number) => {
+  const updateCartQuantity = (productId: string, quantity: number, variantId?: string) => {
     if (quantity <= 0) {
-      removeFromCart(productId);
+      removeFromCart(productId, variantId);
       return;
     }
-    setCart(prev => prev.map(item => 
-      item.product.id === productId ? { ...item, quantity } : item
-    ));
+    setCart(prev => prev.map(item => {
+      const match = variantId 
+        ? item.product.id === productId && item.selectedVariant?.id === variantId
+        : item.product.id === productId;
+      return match ? { ...item, quantity } : item;
+    }));
   };
 
-  const updateCartNotes = (productId: string, notes: string) => {
-    setCart(prev => prev.map(item => 
-      item.product.id === productId ? { ...item, notes } : item
-    ));
+  const updateCartNotes = (productId: string, notes: string, variantId?: string) => {
+    setCart(prev => prev.map(item => {
+      const match = variantId 
+        ? item.product.id === productId && item.selectedVariant?.id === variantId
+        : item.product.id === productId;
+      return match ? { ...item, notes } : item;
+    }));
   };
 
   const clearCart = () => {
@@ -394,15 +503,19 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       deliveryAddress: details.deliveryAddress,
       deliverySlot: details.deliverySlot || 'Earliest available slot (within 2 hours)',
       specialInstructions: details.specialInstructions,
-      items: cart.map(item => ({
-        productId: item.product.id,
-        name: item.product.name,
-        unit: item.product.unit,
-        price: item.product.price,
-        quantity: item.quantity,
-        imageUrl: item.product.images[0],
-        total: item.product.price * item.quantity,
-      })),
+      items: cart.map(item => {
+        const price = item.selectedVariant ? item.selectedVariant.price : item.product.price;
+        const unit = item.selectedVariant ? item.selectedVariant.unit : item.product.unit;
+        return {
+          productId: item.product.id,
+          name: item.product.name,
+          unit,
+          price,
+          quantity: item.quantity,
+          imageUrl: item.product.images[0],
+          total: price * item.quantity,
+        };
+      }),
       subtotal: cartSubtotal,
       deliveryFee: details.fulfillmentMethod === 'store_pickup' ? 0 : deliveryFee,
       discount: couponDiscount,
@@ -568,6 +681,12 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         deleteProduct,
         updateCategory,
         updateSettings,
+        getMainCategories,
+        getSubcategories,
+        getCategoryBySlug,
+        getParentCategory,
+        getAllCategoriesFlat,
+        searchCategories,
         cart,
         addToCart,
         removeFromCart,

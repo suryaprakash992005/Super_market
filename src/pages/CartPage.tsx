@@ -115,66 +115,74 @@ export const CartPage: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Left: Items List */}
         <div className="lg:col-span-8 bg-white rounded-2xl border border-surface-border overflow-hidden shadow-subtle divide-y divide-surface-border">
-          {cart.map((item) => (
-            <div key={item.product.id} className="p-4 sm:p-5 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
-              <div className="flex gap-4 items-center flex-1 min-w-0">
-                <img
-                  src={item.product.images[0]}
-                  alt={item.product.name}
-                  className="w-20 h-20 rounded-xl object-cover border border-surface-border shrink-0 bg-stone-50"
-                />
-                <div className="space-y-1 min-w-0">
-                  <Link 
-                    to={`/product/${item.product.slug || item.product.id}`}
-                    className="font-semibold text-sm text-obsidian hover:text-brand-crimson transition-colors block truncate"
-                  >
-                    {item.product.name}
-                  </Link>
-                  <p className="text-xs text-muted">
-                    Unit: <span className="text-stone-700 font-medium">{item.product.unit}</span>
-                  </p>
-                  <p className="text-xs text-stone-600">
-                    {formatCurrency(item.product.price)} each
-                  </p>
-                </div>
-              </div>
+          {cart.map((item) => {
+            const itemPrice = item.selectedVariant ? item.selectedVariant.price : item.product.price;
+            const itemUnit = item.selectedVariant ? `${item.selectedVariant.name} (${item.selectedVariant.unit})` : item.product.unit;
 
-              {/* Stepper and Subtotal */}
-              <div className="flex items-center justify-between sm:justify-end gap-6 w-full sm:w-auto pt-2 sm:pt-0 border-t sm:border-t-0 border-surface-border/60">
-                <div className="flex items-center border border-surface-border-strong rounded-lg bg-stone-50 overflow-hidden">
-                  <button
-                    onClick={() => updateCartQuantity(item.product.id, item.quantity - 1)}
-                    className="w-8 h-8 flex items-center justify-center text-stone-700 hover:bg-stone-200"
-                    aria-label="Decrease"
-                  >
-                    <Minus className="w-3.5 h-3.5" />
-                  </button>
-                  <span className="w-8 text-center text-xs font-bold text-obsidian">
-                    {item.quantity}
-                  </span>
-                  <button
-                    onClick={() => updateCartQuantity(item.product.id, item.quantity + 1)}
-                    className="w-8 h-8 flex items-center justify-center text-stone-700 hover:bg-stone-200"
-                    aria-label="Increase"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                  </button>
+            return (
+              <div 
+                key={`${item.product.id}-${item.selectedVariant?.id || 'base'}`} 
+                className="p-4 sm:p-5 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between"
+              >
+                <div className="flex gap-4 items-center flex-1 min-w-0">
+                  <img
+                    src={item.product.images[0]}
+                    alt={item.product.name}
+                    className="w-20 h-20 rounded-xl object-cover border border-surface-border shrink-0 bg-stone-50"
+                  />
+                  <div className="space-y-1 min-w-0">
+                    <Link 
+                      to={`/product/${item.product.slug || item.product.id}`}
+                      className="font-semibold text-sm text-obsidian hover:text-brand-crimson transition-colors block truncate"
+                    >
+                      {item.product.name}
+                    </Link>
+                    <p className="text-xs text-muted">
+                      Pack: <span className="text-stone-700 font-medium">{itemUnit}</span>
+                    </p>
+                    <p className="text-xs text-stone-600">
+                      {formatCurrency(itemPrice)} each
+                    </p>
+                  </div>
                 </div>
 
-                <div className="text-right min-w-[80px]">
-                  <span className="font-bold text-sm text-obsidian block">
-                    {formatCurrency(item.product.price * item.quantity)}
-                  </span>
-                  <button
-                    onClick={() => removeFromCart(item.product.id)}
-                    className="text-[11px] text-stone-400 hover:text-red-600 transition-colors mt-0.5"
-                  >
-                    Remove
-                  </button>
+                {/* Stepper and Subtotal */}
+                <div className="flex items-center justify-between sm:justify-end gap-6 w-full sm:w-auto pt-2 sm:pt-0 border-t sm:border-t-0 border-surface-border/60">
+                  <div className="flex items-center border border-surface-border-strong rounded-lg bg-stone-50 overflow-hidden">
+                    <button
+                      onClick={() => updateCartQuantity(item.product.id, item.quantity - 1, item.selectedVariant?.id)}
+                      className="w-8 h-8 flex items-center justify-center text-stone-700 hover:bg-stone-200"
+                      aria-label="Decrease"
+                    >
+                      <Minus className="w-3.5 h-3.5" />
+                    </button>
+                    <span className="w-8 text-center text-xs font-bold text-obsidian">
+                      {item.quantity}
+                    </span>
+                    <button
+                      onClick={() => updateCartQuantity(item.product.id, item.quantity + 1, item.selectedVariant?.id)}
+                      className="w-8 h-8 flex items-center justify-center text-stone-700 hover:bg-stone-200"
+                      aria-label="Increase"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+
+                  <div className="text-right min-w-[80px]">
+                    <span className="font-bold text-sm text-obsidian block">
+                      {formatCurrency(itemPrice * item.quantity)}
+                    </span>
+                    <button
+                      onClick={() => removeFromCart(item.product.id, item.selectedVariant?.id)}
+                      className="text-[11px] text-stone-400 hover:text-red-600 transition-colors mt-0.5"
+                    >
+                      Remove
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Right: Bill Details & Promo */}

@@ -609,24 +609,32 @@ export const CheckoutPage: React.FC = () => {
             </h2>
 
             <div className="space-y-3 max-h-56 overflow-y-auto pr-1 divide-y divide-surface-border/50">
-              {cart.map((item) => (
-                <div key={item.product.id} className="flex items-center justify-between text-xs pt-2.5 first:pt-0">
-                  <div className="flex items-center gap-2.5 min-w-0 pr-2">
-                    <img
-                      src={item.product.images[0]}
-                      alt={item.product.name}
-                      className="w-10 h-10 rounded-lg object-cover border border-surface-border shrink-0"
-                    />
-                    <div className="truncate">
-                      <p className="font-semibold text-obsidian truncate">{item.product.name}</p>
-                      <span className="text-[10px] text-muted">{item.quantity} × {formatCurrency(item.product.price)}</span>
+              {cart.map((item) => {
+                const itemPrice = item.selectedVariant ? item.selectedVariant.price : item.product.price;
+                const itemUnit = item.selectedVariant ? `${item.selectedVariant.name} (${item.selectedVariant.unit})` : item.product.unit;
+
+                return (
+                  <div key={`${item.product.id}-${item.selectedVariant?.id || 'base'}`} className="flex items-center justify-between text-xs pt-2.5 first:pt-0">
+                    <div className="flex items-center gap-2.5 min-w-0 pr-2">
+                      <img
+                        src={item.product.images[0]}
+                        alt={item.product.name}
+                        className="w-10 h-10 rounded-lg object-cover border border-surface-border shrink-0"
+                      />
+                      <div className="truncate">
+                        <p className="font-semibold text-obsidian truncate">{item.product.name}</p>
+                        <span className="text-[10px] text-muted">
+                          {item.quantity} × {formatCurrency(itemPrice)}
+                          {item.selectedVariant && ` • ${item.selectedVariant.name}`}
+                        </span>
+                      </div>
                     </div>
+                    <span className="font-bold text-stone-900 shrink-0">
+                      {formatCurrency(itemPrice * item.quantity)}
+                    </span>
                   </div>
-                  <span className="font-bold text-stone-900 shrink-0">
-                    {formatCurrency(item.product.price * item.quantity)}
-                  </span>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             <div className="pt-4 border-t border-surface-border space-y-2 text-xs">

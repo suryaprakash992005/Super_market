@@ -116,72 +116,77 @@ export const CartDrawer: React.FC = () => {
                 </button>
               </div>
             ) : (
-              cart.map((item) => (
-                <div 
-                  key={item.product.id}
-                  className="flex gap-3.5 pb-4 border-b border-surface-border/60 last:border-0"
-                >
-                  <img
-                    src={item.product.images[0]}
-                    alt={item.product.name}
-                    className="w-16 h-16 rounded-xl object-cover bg-stone-100 border border-surface-border/60 shrink-0"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <div className="flex justify-between items-start gap-1">
-                      <Link 
-                        to={`/product/${item.product.slug || item.product.id}`}
-                        onClick={() => setIsCartOpen(false)}
-                        className="text-xs font-semibold text-obsidian line-clamp-2 hover:text-brand-crimson transition-colors"
-                      >
-                        {item.product.name}
-                      </Link>
-                      <button
-                        onClick={() => removeFromCart(item.product.id)}
-                        className="text-stone-400 hover:text-red-600 transition-colors p-1"
-                        aria-label="Remove item"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
+              cart.map((item) => {
+                const itemPrice = item.selectedVariant ? item.selectedVariant.price : item.product.price;
+                const itemUnit = item.selectedVariant ? `${item.selectedVariant.name} (${item.selectedVariant.unit})` : item.product.unit;
 
-                    <div className="text-[11px] text-muted mt-0.5">
-                      Pack: {item.product.unit}
-                    </div>
-
-                    <div className="flex items-center justify-between mt-2.5">
-                      <div className="flex items-baseline gap-1">
-                        <span className="font-bold text-xs text-obsidian">
-                          {formatCurrency(item.product.price * item.quantity)}
-                        </span>
-                        <span className="text-[10px] text-stone-400">
-                          ({formatCurrency(item.product.price)} ea)
-                        </span>
+                return (
+                  <div 
+                    key={`${item.product.id}-${item.selectedVariant?.id || 'base'}`}
+                    className="flex gap-3.5 pb-4 border-b border-surface-border/60 last:border-0"
+                  >
+                    <img
+                      src={item.product.images[0]}
+                      alt={item.product.name}
+                      className="w-16 h-16 rounded-xl object-cover bg-stone-100 border border-surface-border/60 shrink-0"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex justify-between items-start gap-1">
+                        <Link 
+                          to={`/product/${item.product.slug || item.product.id}`}
+                          onClick={() => setIsCartOpen(false)}
+                          className="text-xs font-semibold text-obsidian line-clamp-2 hover:text-brand-crimson transition-colors"
+                        >
+                          {item.product.name}
+                        </Link>
+                        <button
+                          onClick={() => removeFromCart(item.product.id, item.selectedVariant?.id)}
+                          className="text-stone-400 hover:text-red-600 transition-colors p-1"
+                          aria-label="Remove item"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
                       </div>
 
-                      {/* Pill Stepper */}
-                      <div className="flex items-center border border-surface-border rounded-full bg-stone-50 overflow-hidden shadow-2xs">
-                        <button
-                          onClick={() => updateCartQuantity(item.product.id, item.quantity - 1)}
-                          className="w-6 h-6 flex items-center justify-center text-stone-700 hover:bg-stone-200 transition-colors"
-                          aria-label="Decrease"
-                        >
-                          <Minus className="w-3 h-3" />
-                        </button>
-                        <span className="w-6 text-center text-xs font-semibold text-stone-800">
-                          {item.quantity}
-                        </span>
-                        <button
-                          onClick={() => updateCartQuantity(item.product.id, item.quantity + 1)}
-                          className="w-6 h-6 flex items-center justify-center text-stone-700 hover:bg-stone-200 transition-colors"
-                          aria-label="Increase"
-                        >
-                          <Plus className="w-3 h-3" />
-                        </button>
+                      <div className="text-[11px] text-muted mt-0.5">
+                        Pack: <span className="text-stone-700 font-medium">{itemUnit}</span>
+                      </div>
+
+                      <div className="flex items-center justify-between mt-2.5">
+                        <div className="flex items-baseline gap-1">
+                          <span className="font-bold text-xs text-obsidian">
+                            {formatCurrency(itemPrice * item.quantity)}
+                          </span>
+                          <span className="text-[10px] text-stone-400">
+                            ({formatCurrency(itemPrice)} ea)
+                          </span>
+                        </div>
+
+                        {/* Pill Stepper */}
+                        <div className="flex items-center border border-surface-border rounded-full bg-stone-50 overflow-hidden shadow-2xs">
+                          <button
+                            onClick={() => updateCartQuantity(item.product.id, item.quantity - 1, item.selectedVariant?.id)}
+                            className="w-6 h-6 flex items-center justify-center text-stone-700 hover:bg-stone-200 transition-colors"
+                            aria-label="Decrease"
+                          >
+                            <Minus className="w-3 h-3" />
+                          </button>
+                          <span className="w-6 text-center text-xs font-semibold text-stone-800">
+                            {item.quantity}
+                          </span>
+                          <button
+                            onClick={() => updateCartQuantity(item.product.id, item.quantity + 1, item.selectedVariant?.id)}
+                            className="w-6 h-6 flex items-center justify-center text-stone-700 hover:bg-stone-200 transition-colors"
+                            aria-label="Increase"
+                          >
+                            <Plus className="w-3 h-3" />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
 

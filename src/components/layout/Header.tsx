@@ -208,6 +208,17 @@ export const Header: React.FC = () => {
     }).slice(0, 6);
   }, [searchQuery, products, selectedCategory]);
 
+  // Matching Category suggestions for instant department discovery
+  const matchingCategories = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return [];
+    return categories.filter(c => 
+      c.name.toLowerCase().includes(q) || 
+      c.slug.toLowerCase().includes(q) ||
+      c.subcategories?.some(s => s.name.toLowerCase().includes(q))
+    ).slice(0, 3);
+  }, [searchQuery, categories]);
+
   // Handle typing state
   useEffect(() => {
     if (searchQuery.trim()) {
@@ -429,7 +440,7 @@ export const Header: React.FC = () => {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 onFocus={() => setIsSearchFocused(true)}
                 onKeyDown={handleKeyDown}
-                placeholder="Search farm vegetables, A2 milk, aged rice, cold-pressed oils..."
+                placeholder="Search atta, biscuits, chocolates, badam..."
                 className="w-full text-xs sm:text-[13.5px] font-medium px-2.5 bg-transparent text-stone-900 placeholder:text-stone-400 outline-none focus:outline-none focus:ring-0 border-none selection:bg-red-100 selection:text-brand-crimson"
               />
 
@@ -472,6 +483,29 @@ export const Header: React.FC = () => {
                 className="absolute top-full left-0 right-0 mt-2.5 bg-white rounded-2xl shadow-[0_25px_60px_-15px_rgba(0,0,0,0.22)] border border-stone-200/90 overflow-hidden z-[100] animate-fadeIn ring-1 ring-black/5"
                 role="listbox"
               >
+                {/* Category suggestions preview if match found */}
+                {searchQuery.trim() && matchingCategories.length > 0 && (
+                  <div className="p-2.5 bg-red-50/60 border-b border-red-100 flex items-center gap-1.5 flex-wrap">
+                    <span className="text-[10px] font-bold text-stone-500 uppercase tracking-wider mr-1">
+                      Departments:
+                    </span>
+                    {matchingCategories.map((mc) => (
+                      <button
+                        key={mc.id}
+                        type="button"
+                        onClick={() => {
+                          setIsSearchFocused(false);
+                          navigate(`/products?category=${mc.slug}`);
+                        }}
+                        className="px-2.5 py-0.5 bg-white hover:bg-brand-crimson hover:text-white text-stone-800 rounded-full text-[11px] font-semibold border border-red-200/80 shadow-2xs transition-colors flex items-center gap-1"
+                      >
+                        <span>{mc.name}</span>
+                        <ArrowRight className="w-2.5 h-2.5 text-brand-crimson" />
+                      </button>
+                    ))}
+                  </div>
+                )}
+
                 {/* State: Typing query with matching results */}
                 {searchQuery.trim() && matchingProducts.length > 0 && (
                   <>
@@ -751,27 +785,18 @@ export const Header: React.FC = () => {
           {/* Right Micro Actions — simplified on mobile to prevent overflow at 320-375px */}
           <div className="flex items-center gap-1 sm:gap-2 md:gap-3 shrink-0 animate-entrance-basket">
 
-            {/* Mobile search icon button — opens the full-screen search overlay */}
-            <button
-              onClick={() => setIsMobileSearchOpen(true)}
-              className="sm:hidden p-2 text-stone-700 hover:text-brand-crimson hover:bg-stone-100 rounded-full transition-colors"
-              aria-label="Open search"
-            >
-              <Search className="w-5 h-5" />
-            </button>
-
-            {/* Customer delivery address pin indicator — hidden on narrow mobile, shown sm+ */}
+            {/* Customer delivery address pin indicator — visible on both mobile and desktop */}
             <button
               onClick={() => setIsLocationModalOpen(true)}
-              className="hidden sm:flex items-center gap-1.5 text-xs text-stone-700 bg-red-50/80 hover:bg-red-100/80 px-2.5 py-1.5 rounded-full border border-red-200/80 font-medium transition-colors shrink-0 active:scale-95 animate-entrance-location"
+              className="flex items-center gap-1 sm:gap-1.5 text-xs text-stone-700 bg-red-50/80 hover:bg-red-100/80 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-full border border-red-200/80 font-medium transition-colors shrink-0 active:scale-95 animate-entrance-location"
               aria-label="Customer delivery address"
               title="Click to select or manage customer delivery address"
             >
               <MapPin className="w-3.5 h-3.5 text-brand-crimson shrink-0" />
               <div className="flex items-center gap-1 text-left">
                 <span className="text-[10px] font-bold text-stone-500 hidden md:inline">Deliver to:</span>
-                <span className="text-[11px] font-bold text-brand-crimson truncate max-w-[120px] sm:max-w-[170px]">
-                  {activeAddress ? `${activeAddress.label || 'Home'} · ${activeAddress.streetAddress.split(',')[0]}` : 'Customer Address'}
+                <span className="text-[10.5px] sm:text-[11px] font-bold text-brand-crimson truncate max-w-[95px] xs:max-w-[135px] sm:max-w-[170px]">
+                  {activeAddress ? `${activeAddress.label || 'Home'} · ${activeAddress.city || 'Madurai'}` : 'Madurai Central'}
                 </span>
               </div>
             </button>
@@ -841,7 +866,7 @@ export const Header: React.FC = () => {
                 <Search className="w-3.5 h-3.5 stroke-[2.5]" />
               </div>
               <span className="text-xs font-medium text-stone-400 truncate">
-                Search farm vegetables, milk, rice, spices...
+                Search atta, biscuits, chocolates, badam...
               </span>
             </div>
             <span className="text-[10px] font-bold text-brand-crimson uppercase tracking-wider bg-red-50 border border-red-100 px-2.5 py-0.5 rounded-full shrink-0">
@@ -940,7 +965,7 @@ export const Header: React.FC = () => {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  placeholder="Search farm produce, milk, rice, spices..."
+                  placeholder="Search atta, biscuits, chocolates, badam..."
                   className="w-full text-sm font-medium bg-transparent text-stone-900 placeholder:text-stone-400 outline-none border-none selection:bg-red-100 selection:text-brand-crimson"
                 />
                 {searchQuery && (
@@ -969,6 +994,29 @@ export const Header: React.FC = () => {
 
             {/* Mobile Search Results / Suggestions Scrollable Container (pb-32 for keyboard safety) */}
             <div className="flex-1 overflow-y-auto divide-y divide-stone-100 bg-white pb-32">
+              {/* Category suggestions chips in mobile search */}
+              {searchQuery.trim() && matchingCategories.length > 0 && (
+                <div className="p-3 bg-red-50/60 border-b border-red-100 flex items-center gap-1.5 flex-wrap">
+                  <span className="text-[10px] font-bold text-stone-500 uppercase tracking-wider mr-1">
+                    Matching Aisles:
+                  </span>
+                  {matchingCategories.map((mc) => (
+                    <button
+                      key={mc.id}
+                      type="button"
+                      onClick={() => {
+                        setIsMobileSearchOpen(false);
+                        navigate(`/products?category=${mc.slug}`);
+                      }}
+                      className="px-2.5 py-1 bg-white hover:bg-brand-crimson hover:text-white text-stone-800 rounded-full text-xs font-semibold border border-red-200/80 shadow-2xs transition-colors flex items-center gap-1"
+                    >
+                      <span>{mc.name}</span>
+                      <ArrowRight className="w-3 h-3 text-brand-crimson" />
+                    </button>
+                  ))}
+                </div>
+              )}
+
               {searchQuery.trim() && matchingProducts.length > 0 && (
                 <>
                   <div className="p-3 bg-stone-50 text-[11px] font-bold text-stone-700 uppercase tracking-wider flex items-center justify-between border-b border-stone-100">

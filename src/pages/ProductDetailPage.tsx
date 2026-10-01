@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { 
   Heart, 
@@ -13,10 +13,12 @@ import {
   ChevronRight,
   Sparkles,
   Info,
-  ArrowRight
+  ArrowRight,
+  Tag
 } from 'lucide-react';
 import { useStore } from '../context/StoreContext';
 import { ProductCard } from '../components/common/ProductCard';
+import { ProductVariant } from '../types';
 import { formatCurrency, calculateDiscount, cn } from '../lib/utils';
 
 export const ProductDetailPage: React.FC = () => {
@@ -41,6 +43,18 @@ export const ProductDetailPage: React.FC = () => {
 
   const product = products.find(p => p.slug === id || p.id === id) || products[0];
 
+  const [selectedVariant, setSelectedVariant] = useState<ProductVariant | undefined>(() => {
+    return product?.variants && product.variants.length > 0 ? product.variants[0] : undefined;
+  });
+
+  useEffect(() => {
+    if (product?.variants && product.variants.length > 0) {
+      setSelectedVariant(product.variants[0]);
+    } else {
+      setSelectedVariant(undefined);
+    }
+  }, [product]);
+
   if (!product) {
     return (
       <div className="max-w-7xl mx-auto px-4 py-16 text-center">
@@ -53,20 +67,24 @@ export const ProductDetailPage: React.FC = () => {
   }
 
   const isWishlisted = isInWishlist(product.id);
-  const discount = calculateDiscount(product.mrp, product.price);
+  const currentPrice = selectedVariant ? selectedVariant.price : product.price;
+  const currentMrp = selectedVariant ? selectedVariant.mrp : product.mrp;
+  const currentUnit = selectedVariant ? `${selectedVariant.name} (${selectedVariant.unit})` : product.unit;
+  const currentInStock = selectedVariant ? selectedVariant.inStock : product.inStock;
+  const discount = calculateDiscount(currentMrp, currentPrice);
 
   const relatedProducts = products
     .filter(p => p.category === product.category && p.id !== product.id)
     .slice(0, 4);
 
   const handleAddToCart = () => {
-    addToCart(product, quantity);
+    addToCart(product, quantity, undefined, selectedVariant);
     setAddedNotice(true);
     setTimeout(() => setAddedNotice(false), 1200);
   };
 
   const handleBuyNow = () => {
-    addToCart(product, quantity);
+    addToCart(product, quantity, undefined, selectedVariant);
     setIsCartOpen(false);
     navigate('/checkout');
   };
@@ -212,25 +230,69 @@ export const ProductDetailPage: React.FC = () => {
           </div>
 
           {/* Pricing display */}
-          <div className="pt-2 border-t border-surface-border">
+          <div className="pt-2 border-t border-surface-border space-y-3">
+            <div className="flex items-center gap-2">
+              {product.brand && (
+                <span className="text-xs font-bold text-stone-700 bg-stone-100 border border-stone-200 px-2.5 py-0.5 rounded-md">
+                  Brand: {product.brand}
+                </span>
+              )}
+            </div>
+
             <div className="flex items-baseline gap-3">
               <span className="font-serif text-3xl sm:text-4xl font-bold text-obsidian">
-                {formatCurrency(product.price)}
+                {formatCurrency(currentPrice)}
               </span>
-              {product.mrp > product.price && (
+              {currentMrp > currentPrice && (
                 <>
                   <span className="text-sm text-stone-400 line-through">
-                    {formatCurrency(product.mrp)}
+                    {formatCurrency(currentMrp)}
                   </span>
                   <span className="text-xs font-bold text-supermarket-fresh bg-green-50 px-2.5 py-0.5 rounded-full">
-                    Save {formatCurrency(product.mrp - product.price)}
+                    Save {formatCurrency(currentMrp - currentPrice)}
                   </span>
                 </>
               )}
             </div>
-            <p className="text-xs text-stone-500 mt-1">
-              Pack Size: <strong className="text-obsidian">{product.unit}</strong> • Inclusive of all taxes
+            <p className="text-xs text-stone-500">
+              Selected Pack: <strong className="text-obsidian">{currentUnit}</strong> • Inclusive of all taxes
             </p>
+
+            {/* Pack Size Variants Selector */}
+            {product.variants && product.variants.length > 0 && (
+              <div className="pt-2 space-y-2">
+                <span className="text-xs font-bold text-obsidian block">
+                  Select Pack Size:
+                </span>
+                <div className="flex flex-wrap gap-2">
+                  {product.variants.map((v) => {
+                    const isSelected = selectedVariant?.id === v.id;
+                    const vDiscount = calculateDiscount(v.mrp, v.price);
+                    return (
+                      <button
+                        key={v.id}
+                        type="button"
+                        onClick={() => setSelectedVariant(v)}
+                        className={cn(
+                          "px-3.5 py-2 rounded-xl border text-xs font-semibold transition-all flex items-center gap-2 min-h-[40px]",
+                          isSelected
+                            ? "border-brand-crimson bg-red-50/80 text-brand-crimson shadow-xs ring-1 ring-brand-crimson"
+                            : "border-surface-border bg-white text-stone-700 hover:bg-stone-50"
+                        )}
+                      >
+                        <span>{v.name} ({v.unit})</span>
+                        <span className="font-bold text-obsidian">{formatCurrency(v.price)}</span>
+                        {vDiscount > 0 && (
+                          <span className="text-[10px] text-supermarket-fresh font-bold">
+                            {vDiscount}% OFF
+                          </span>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Description */}
@@ -302,16 +364,16 @@ export const ProductDetailPage: React.FC = () => {
                 </button>
               </div>
               <span className="text-xs text-stone-500">
-                Item Total: <strong className="text-obsidian">{formatCurrency(product.price * quantity)}</strong>
+                Item Total: <strong className="text-obsidian">{formatCurrency(currentPrice * quantity)}</strong>
               </span>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <button
                 onClick={handleAddToCart}
-                disabled={!product.inStock}
+                disabled={!currentInStock}
                 className={cn(
-                  "py-3.5 rounded-full text-xs font-bold tracking-wider uppercase flex items-center justify-center gap-2 transition-all duration-200 shadow-crimson active:scale-98",
+                  "py-3.5 rounded-full text-xs font-bold tracking-wider uppercase flex items-center justify-center gap-2 transition-all duration-200 shadow-crimson active:scale-98 min-h-[44px]",
                   addedNotice 
                     ? "bg-supermarket-fresh text-white"
                     : "bg-brand-crimson hover:bg-brand-crimson-dark text-white"
@@ -332,8 +394,8 @@ export const ProductDetailPage: React.FC = () => {
 
               <button
                 onClick={handleBuyNow}
-                disabled={!product.inStock}
-                className="py-3.5 bg-stone-900 hover:bg-stone-800 text-white rounded-full text-xs font-bold tracking-wider uppercase flex items-center justify-center gap-2 transition-all shadow-xs active:scale-98"
+                disabled={!currentInStock}
+                className="py-3.5 bg-stone-900 hover:bg-stone-800 text-white rounded-full text-xs font-bold tracking-wider uppercase flex items-center justify-center gap-2 transition-all shadow-xs active:scale-98 min-h-[44px]"
               >
                 <span>Instant Buy Now</span>
               </button>
@@ -385,16 +447,16 @@ export const ProductDetailPage: React.FC = () => {
           <div className="min-w-0">
             <div className="flex items-baseline gap-1.5">
               <span className="font-serif text-xl font-bold text-obsidian tracking-tight">
-                {formatCurrency(product.price * quantity)}
+                {formatCurrency(currentPrice * quantity)}
               </span>
-              {product.mrp > product.price && (
+              {currentMrp > currentPrice && (
                 <span className="text-[10px] text-stone-400 line-through">
-                  {formatCurrency(product.mrp * quantity)}
+                  {formatCurrency(currentMrp * quantity)}
                 </span>
               )}
             </div>
             <span className="text-[10px] text-stone-500 font-medium block truncate">
-              {product.unit} • Inclusive of GST
+              {currentUnit} • Inclusive of GST
             </span>
           </div>
 
@@ -427,7 +489,7 @@ export const ProductDetailPage: React.FC = () => {
             <button
               type="button"
               onClick={handleAddToCart}
-              disabled={!product.inStock}
+              disabled={!currentInStock}
               className={cn(
                 "h-10 px-4 rounded-full text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-1.5 transition-all shadow-crimson active:scale-95",
                 addedNotice 

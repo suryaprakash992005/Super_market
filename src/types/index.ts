@@ -1,21 +1,28 @@
-export type CategoryId = 
-  | 'fruits-vegetables'
-  | 'dairy-bakery'
-  | 'staples-grains'
-  | 'snacks-beverages'
-  | 'personal-care'
-  | 'household-cleaning'
-  | 'spices-masalas'
-  | 'gourmet-organic';
+export type CategoryId = string;
+
+export interface ProductVariant {
+  id: string;
+  name?: string; // e.g. "Standard Pack", "Value Pack", "500g"
+  unit: string; // e.g. "50 g", "100 g", "200 g", "250 g", "500 g", "1 kg"
+  price: number;
+  mrp: number;
+  inStock: boolean;
+  stockQuantity?: number;
+}
 
 export interface Category {
   id: string;
   name: string;
   slug: string;
+  parentId?: string | null;
   description: string;
   imageUrl: string;
+  icon?: string;
+  displayOrder?: number;
+  isActive?: boolean;
   itemCount: number;
   featured?: boolean;
+  subcategories?: Category[];
 }
 
 export interface Product {
@@ -24,9 +31,14 @@ export interface Product {
   slug: string;
   category: CategoryId;
   categoryName: string;
+  subcategoryId?: string;
+  subcategorySlug?: string;
+  subcategoryName?: string;
+  brand?: string;
   price: number;
   mrp: number; // Maximum Retail Price (for strikethrough discount)
   unit: string; // e.g. "1 kg", "500 g", "1 L", "Pack of 6"
+  variants?: ProductVariant[];
   inStock: boolean;
   stockQuantity: number;
   isFeatured?: boolean;
@@ -45,6 +57,7 @@ export interface Product {
 export interface CartItem {
   product: Product;
   quantity: number;
+  selectedVariant?: ProductVariant;
   notes?: string;
 }
 

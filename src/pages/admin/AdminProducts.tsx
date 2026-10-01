@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   Package, 
   Plus, 
@@ -12,12 +12,12 @@ import {
   Eye
 } from 'lucide-react';
 import { useStore } from '../../context/StoreContext';
-import { Product, CategoryId } from '../../types';
+import { Product, CategoryId, Category } from '../../types';
 import { formatCurrency } from '../../lib/utils';
 import { uploadToR2 } from '../../lib/r2Storage';
 
 export const AdminProducts: React.FC = () => {
-  const { products, categories, addProduct, updateProduct, deleteProduct } = useStore();
+  const { products, categories, getSubcategories, addProduct, updateProduct, deleteProduct } = useStore();
   const [searchTerm, setSearchTerm] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
 
@@ -27,7 +27,9 @@ export const AdminProducts: React.FC = () => {
 
   // Form State
   const [name, setName] = useState('');
+  const [brand, setBrand] = useState('');
   const [category, setCategory] = useState<CategoryId>('fruits-vegetables');
+  const [subcategoryId, setSubcategoryId] = useState<string>('');
   const [price, setPrice] = useState<number>(50);
   const [mrp, setMrp] = useState<number>(65);
   const [unit, setUnit] = useState('1 kg');
@@ -41,9 +43,14 @@ export const AdminProducts: React.FC = () => {
   const [inStock, setInStock] = useState(true);
   const [uploading, setUploading] = useState(false);
 
+  const availableSubcategories = useMemo(() => {
+    return getSubcategories ? getSubcategories(category) : [];
+  }, [category, getSubcategories]);
+
   const filteredProducts = products.filter(p => {
     const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.categoryName.toLowerCase().includes(searchTerm.toLowerCase());
+      p.categoryName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (p.brand && p.brand.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesCategory = categoryFilter === 'all' || p.category === categoryFilter;
     return matchesSearch && matchesCategory;
   });
@@ -51,7 +58,9 @@ export const AdminProducts: React.FC = () => {
   const openAddModal = () => {
     setEditingProduct(null);
     setName('');
+    setBrand('Bharathi Fresh');
     setCategory('fruits-vegetables');
+    setSubcategoryId('');
     setPrice(50);
     setMrp(65);
     setUnit('1 kg');
@@ -69,7 +78,9 @@ export const AdminProducts: React.FC = () => {
   const openEditModal = (p: Product) => {
     setEditingProduct(p);
     setName(p.name);
+    setBrand(p.brand || '');
     setCategory(p.category);
+    setSubcategoryId(p.subcategoryId || '');
     setPrice(p.price);
     setMrp(p.mrp);
     setUnit(p.unit);
@@ -101,12 +112,17 @@ export const AdminProducts: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const categoryName = categories.find(c => c.slug === category)?.name || 'General Groceries';
+    const subcat = availableSubcategories.find((s: Category) => s.id === subcategoryId || s.slug === subcategoryId);
 
     if (editingProduct) {
       updateProduct(editingProduct.id, {
         name,
+        brand: brand.trim() || undefined,
         category,
         categoryName,
+        subcategoryId: subcat?.id || (subcategoryId ? subcategoryId : undefined),
+        subcategorySlug: subcat?.slug || undefined,
+        subcategoryName: subcat?.name || undefined,
         price,
         mrp,
         unit,
@@ -122,9 +138,13 @@ export const AdminProducts: React.FC = () => {
     } else {
       addProduct({
         name,
+        brand: brand.trim() || undefined,
         slug: name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
         category,
         categoryName,
+        subcategoryId: subcat?.id || (subcategoryId ? subcategoryId : undefined),
+        subcategorySlug: subcat?.slug || undefined,
+        subcategoryName: subcat?.name || undefined,
         price,
         mrp,
         unit,
@@ -353,13 +373,41 @@ export const AdminProducts: React.FC = () => {
                   <label className="block font-semibold text-stone-700 mb-1">Department / Aisle</label>
                   <select
                     value={category}
-                    onChange={(e) => setCategory(e.target.value as any)}
+                    onChange={(e) => {
+                      setCategory(e.target.value as any);
+                      setSubcategoryId('');
+                    }}
                     className="w-full px-3 py-2 border border-surface-border rounded-lg bg-stone-50"
                   >
                     {categories.map((c) => (
                       <option key={c.id} value={c.slug}>{c.name}</option>
                     ))}
                   </select>
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-stone-700 mb-1">Sub-Aisle / Category</label>
+                  <select
+                    value={subcategoryId}
+                    onChange={(e) => setSubcategoryId(e.target.value)}
+                    className="w-full px-3 py-2 border border-surface-border rounded-lg bg-stone-50"
+                  >
+                    <option value="">-- General / Main Aisle --</option>
+                    {availableSubcategories.map((s: Category) => (
+                      <option key={s.id} value={s.id}>{s.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block font-semibold text-stone-700 mb-1">Brand / Producer</label>
+                  <input
+                    type="text"
+                    value={brand}
+                    onChange={(e) => setBrand(e.target.value)}
+                    placeholder="e.g. Aashirvaad, Fortune, Tata, Bharathi Fresh"
+                    className="w-full px-3 py-2 border border-surface-border rounded-lg"
+                  />
                 </div>
 
                 <div>

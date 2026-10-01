@@ -17,9 +17,10 @@ CREATE TABLE IF NOT EXISTS public.profiles (
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- 2. CATEGORIES (Supermarket Aisles)
+-- 2. CATEGORIES (Supermarket Aisles & Subcategories)
 CREATE TABLE IF NOT EXISTS public.categories (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    parent_id UUID REFERENCES public.categories(id) ON DELETE SET NULL,
     name TEXT NOT NULL,
     slug TEXT UNIQUE NOT NULL,
     description TEXT,
@@ -27,19 +28,33 @@ CREATE TABLE IF NOT EXISTS public.categories (
     icon_name TEXT,
     display_order INT DEFAULT 0,
     is_active BOOLEAN DEFAULT true,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- Safe migration statements for existing database instances:
+-- ALTER TABLE public.categories ADD COLUMN IF NOT EXISTS parent_id UUID REFERENCES public.categories(id) ON DELETE SET NULL;
+-- ALTER TABLE public.categories ADD COLUMN IF NOT EXISTS icon_name TEXT;
+-- ALTER TABLE public.categories ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW();
+-- ALTER TABLE public.products ADD COLUMN IF NOT EXISTS subcategory_id UUID REFERENCES public.categories(id) ON DELETE SET NULL;
+-- ALTER TABLE public.products ADD COLUMN IF NOT EXISTS brand TEXT;
+-- ALTER TABLE public.products ADD COLUMN IF NOT EXISTS variants JSONB DEFAULT '[]'::jsonb;
+-- ALTER TABLE public.cart_items ADD COLUMN IF NOT EXISTS selected_variant JSONB;
+-- ALTER TABLE public.order_items ADD COLUMN IF NOT EXISTS selected_variant JSONB;
 
 -- 3. PRODUCTS
 CREATE TABLE IF NOT EXISTS public.products (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     category_id UUID REFERENCES public.categories(id) ON DELETE SET NULL,
+    subcategory_id UUID REFERENCES public.categories(id) ON DELETE SET NULL,
     name TEXT NOT NULL,
     slug TEXT UNIQUE NOT NULL,
+    brand TEXT,
     description TEXT,
     price NUMERIC(10, 2) NOT NULL CHECK (price >= 0),
     mrp NUMERIC(10, 2) NOT NULL CHECK (mrp >= price),
     unit TEXT NOT NULL, -- e.g. '1 kg', '500 g', '1 L'
+    variants JSONB DEFAULT '[]'::jsonb,
     in_stock BOOLEAN DEFAULT true,
     stock_quantity INT NOT NULL DEFAULT 100 CHECK (stock_quantity >= 0),
     is_featured BOOLEAN DEFAULT false,
@@ -51,6 +66,19 @@ CREATE TABLE IF NOT EXISTS public.products (
     primary_image TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+
+-- 3b. PRODUCT VARIANTS (Pack size variants: 250g, 500g, 1kg)
+CREATE TABLE IF NOT EXISTS public.product_variants (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    product_id UUID NOT NULL REFERENCES public.products(id) ON DELETE CASCADE,
+    name TEXT,
+    unit TEXT NOT NULL,
+    price NUMERIC(10, 2) NOT NULL CHECK (price >= 0),
+    mrp NUMERIC(10, 2) NOT NULL CHECK (mrp >= price),
+    in_stock BOOLEAN DEFAULT true,
+    stock_quantity INT DEFAULT 50,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 -- 4. PRODUCT IMAGES (Cloudflare R2 storage references)
