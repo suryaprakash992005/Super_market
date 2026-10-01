@@ -4,7 +4,6 @@ import { ArrowRight, ChevronRight, ChevronLeft, Store, MapPin, Leaf, ShieldCheck
 import { useStore } from '../context/StoreContext';
 import { ProductCard } from '../components/common/ProductCard';
 import { HeroBannerCarousel, MobileHeroBannerCarousel } from '../components/common/HeroBannerCarousel';
-import { FlexShowcaseSection } from '../components/common/FlexShowcaseSection';
 import { cn } from '../lib/utils';
 
 const SectionHeader: React.FC<{
@@ -123,11 +122,6 @@ export const HomePage: React.FC = () => {
             </div>
           </div>
         )}
-
-        {/* Mobile Fluid Lens FlexCarousel Showcase */}
-        <div className='mt-7 mx-2'>
-          <FlexShowcaseSection className='my-0 px-2' />
-        </div>
         <div className='mt-8 mx-4 grid grid-cols-2 gap-3 pb-6'>
           {[
             { icon: <Truck className='w-4 h-4' />, title: 'Local Delivery', desc: 'Within your area' },
@@ -250,9 +244,6 @@ export const HomePage: React.FC = () => {
               </div>
             </div>
           </section>
-
-          {/* Interactive WebGL Fluid Lens Carousel Showcase */}
-          <FlexShowcaseSection />
 
           {/* Staples Rail */}
           {dailyStaples.length > 0 && (
