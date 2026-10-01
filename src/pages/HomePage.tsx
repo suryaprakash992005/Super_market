@@ -110,16 +110,18 @@ export const HomePage: React.FC = () => {
 
   // Curated Quick Category Shortcuts with modern supermarket imagery
   const quickShortcuts = [
-    { name: 'Fruits & Veg',     slug: 'fruits-vegetables',       img: 'https://images.unsplash.com/photo-1610348725531-843dff563e2c?auto=format&fit=crop&w=300&q=80' },
-    { name: 'Rice & Atta',      slug: 'staples-grains',          img: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=300&q=80' },
-    { name: 'Milk & Dairy',     slug: 'dairy-bakery',            img: 'https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=300&q=80' },
-    { name: 'Spices & Ghee',    slug: 'spices-masalas',          img: 'https://images.unsplash.com/photo-1589927986089-35812388d1f4?auto=format&fit=crop&w=300&q=80' },
-    { name: 'Tea & Coffee',     slug: 'snacks-beverages',        img: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=300&q=80' },
-    { name: 'Dry Fruits',       slug: 'gourmet-organic',         img: 'https://images.unsplash.com/photo-1508061253366-f7da158b6d46?auto=format&fit=crop&w=300&q=80' },
-    { name: 'Snacks & Namkeen', slug: 'chips-snacks-namkeen',    img: 'https://images.unsplash.com/photo-1566478989037-eec170784d0b?auto=format&fit=crop&w=300&q=80' },
+    { name: 'Fresh Produce',    slug: 'fruits-vegetables',       img: 'https://images.unsplash.com/photo-1610348725531-843dff563e2c?auto=format&fit=crop&w=300&q=80' },
+    { name: 'Dairy & Bakery',   slug: 'dairy-bakery',            img: 'https://images.unsplash.com/photo-1550583724-b2692b85b150?auto=format&fit=crop&w=300&q=80' },
+    { name: 'Staples & Grains', slug: 'staples-grains',          img: 'https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=300&q=80' },
+    { name: 'Spices & Masalas', slug: 'spices-masalas',          img: 'https://images.unsplash.com/photo-1589927986089-35812388d1f4?auto=format&fit=crop&w=300&q=80' },
+    { name: 'Snacks & Drinks',  slug: 'snacks-beverages',        img: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?auto=format&fit=crop&w=300&q=80' },
+    { name: 'Household',        slug: 'household-cleaning',      img: 'https://images.unsplash.com/photo-1583947215259-38e31be8751f?auto=format&fit=crop&w=300&q=80' },
     { name: 'Personal Care',    slug: 'personal-care',           img: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=300&q=80' },
-    { name: 'Home Care',        slug: 'household-cleaning',      img: 'https://images.unsplash.com/photo-1583947215259-38e31be8751f?auto=format&fit=crop&w=300&q=80' },
+    { name: 'Dry Fruits',       slug: 'gourmet-organic',         img: 'https://images.unsplash.com/photo-1508061253366-f7da158b6d46?auto=format&fit=crop&w=300&q=80' },
+    { name: 'Namkeen & Chips',  slug: 'chips-snacks-namkeen',    img: 'https://images.unsplash.com/photo-1566478989037-eec170784d0b?auto=format&fit=crop&w=300&q=80' },
     { name: 'Pooja Needs',      slug: 'pooja-spiritual-needs',   img: 'https://images.unsplash.com/photo-1609137144813-7d9921338f24?auto=format&fit=crop&w=300&q=80' },
+    { name: 'Biscuits & Bakery',slug: 'biscuits-cookies-bakery', img: 'https://images.unsplash.com/photo-1558961363-fa8fdf82db35?auto=format&fit=crop&w=300&q=80' },
+    { name: 'Cold Drinks',      slug: 'cold-drinks-juices',      img: 'https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=300&q=80' },
   ];
 
   return (
@@ -139,36 +141,45 @@ export const HomePage: React.FC = () => {
           <span className='text-brand-crimson font-bold'>Free delivery over ₹499</span>
         </div>
 
-        {/* 2. Horizontal Category Shortcuts (Immediately below Header) */}
-        <div className='mt-3.5'>
+        {/* 2. Horizontal Category Shortcuts - Continuous Scrolling Animation (Mobile) */}
+        <div className='mt-3.5 relative overflow-hidden'>
           <div className='px-4 flex items-center justify-between mb-2.5'>
-            <h3 className='font-serif text-sm font-bold text-obsidian uppercase tracking-wide'>
-              Explore Aisles
+            <h3 className='font-serif text-sm font-bold text-obsidian uppercase tracking-wide flex items-center gap-1.5'>
+              <span>Explore Aisles</span>
+              <span className='w-1.5 h-1.5 rounded-full bg-brand-crimson animate-pulse' />
             </h3>
             <Link to='/categories' className='text-[11px] font-bold text-brand-crimson flex items-center gap-0.5'>
               All Departments ({quickShortcuts.length}+) <ChevronRight className='w-3 h-3' />
             </Link>
           </div>
-          <div className='flex gap-3 overflow-x-auto px-4 pb-2 no-scrollbar'>
-            {quickShortcuts.map((cat) => (
-              <Link 
-                key={cat.slug} 
-                to={'/products?category=' + cat.slug} 
-                className='flex flex-col items-center gap-1.5 shrink-0 group active:scale-95 transition-transform'
-              >
-                <div className='w-[64px] h-[64px] rounded-2xl overflow-hidden border border-surface-border shadow-2xs bg-stone-100 group-hover:border-brand-crimson'>
-                  <img 
-                    src={cat.img} 
-                    alt={cat.name} 
-                    className='w-full h-full object-cover group-active:scale-95 transition-transform duration-200' 
-                    loading='lazy'
-                  />
-                </div>
-                <span className='text-[10px] font-semibold text-stone-700 text-center leading-tight max-w-[68px] line-clamp-2'>
-                  {cat.name}
-                </span>
-              </Link>
-            ))}
+          
+          <div className='relative overflow-hidden py-1'>
+            {/* Left and Right Edge Fade Gradients */}
+            <div className='absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-[#F7F5F1] to-transparent pointer-events-none z-10' />
+            <div className='absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-[#F7F5F1] to-transparent pointer-events-none z-10' />
+
+            {/* Continuous Marquee Rail */}
+            <div className='animate-category-marquee flex gap-3 items-center select-none'>
+              {[...quickShortcuts, ...quickShortcuts].map((cat, idx) => (
+                <Link 
+                  key={`m-${cat.slug}-${idx}`} 
+                  to={'/products?category=' + cat.slug} 
+                  className='flex flex-col items-center gap-1.5 shrink-0 group active:scale-95 transition-transform'
+                >
+                  <div className='w-[68px] h-[68px] rounded-2xl overflow-hidden border border-surface-border shadow-2xs bg-white group-hover:border-brand-crimson group-active:scale-95 transition-transform duration-200'>
+                    <img 
+                      src={cat.img} 
+                      alt={cat.name} 
+                      className='w-full h-full object-cover group-hover:scale-105 transition-transform duration-300' 
+                      loading='lazy'
+                    />
+                  </div>
+                  <span className='text-[10px] font-semibold text-stone-700 text-center leading-tight max-w-[72px] truncate group-hover:text-brand-crimson transition-colors'>
+                    {cat.name}
+                  </span>
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
 
@@ -365,34 +376,41 @@ export const HomePage: React.FC = () => {
 
         <div className='space-y-16 sm:space-y-24 pb-24 mt-10 sm:mt-14'>
 
-          {/* Quick Categories Bar */}
-          <section className='max-w-7xl mx-auto px-6'>
+          {/* Quick Categories Bar - Continuous Scrolling Animation */}
+          <section className='max-w-7xl mx-auto px-4 sm:px-6 relative'>
             <SectionHeader 
               label='Organized Supermarket Aisles' 
               title='Shop by Department' 
               viewAllHref='/categories' 
               viewAllLabel='Browse All 32 Departments' 
             />
-            <div className='grid grid-cols-5 lg:grid-cols-10 gap-3'>
-              {quickShortcuts.map(cat => (
-                <Link 
-                  key={cat.slug} 
-                  to={'/products?category=' + cat.slug} 
-                  className='group flex flex-col items-center gap-2 text-center'
-                >
-                  <div className='w-full aspect-square rounded-2xl overflow-hidden border border-surface-border shadow-2xs bg-stone-100 group-hover:border-brand-crimson group-hover:shadow-md transition-all duration-300'>
-                    <img 
-                      src={cat.img} 
-                      alt={cat.name} 
-                      className='w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out' 
-                      loading='lazy' 
-                    />
-                  </div>
-                  <span className='text-[11px] font-semibold text-stone-700 group-hover:text-brand-crimson transition-colors leading-tight line-clamp-1'>
-                    {cat.name}
-                  </span>
-                </Link>
-              ))}
+            <div className='relative overflow-hidden py-3'>
+              {/* Left and Right Edge Fade Gradients */}
+              <div className='absolute left-0 top-0 bottom-0 w-16 sm:w-24 bg-gradient-to-r from-[#F7F5F1] to-transparent pointer-events-none z-10' />
+              <div className='absolute right-0 top-0 bottom-0 w-16 sm:w-24 bg-gradient-to-l from-[#F7F5F1] to-transparent pointer-events-none z-10' />
+
+              {/* Continuous Infinite Scrolling Conveyor */}
+              <div className='animate-category-marquee flex gap-4 sm:gap-6 items-center select-none'>
+                {[...quickShortcuts, ...quickShortcuts].map((cat, idx) => (
+                  <Link 
+                    key={`d-${cat.slug}-${idx}`} 
+                    to={'/products?category=' + cat.slug} 
+                    className='group flex flex-col items-center gap-2 text-center shrink-0 active:scale-95 transition-transform duration-200'
+                  >
+                    <div className='w-20 h-20 sm:w-24 sm:h-24 aspect-square rounded-2xl overflow-hidden border border-stone-200/90 shadow-2xs bg-white group-hover:border-brand-crimson group-hover:shadow-lg group-hover:scale-105 transition-all duration-300 relative'>
+                      <img 
+                        src={cat.img} 
+                        alt={cat.name} 
+                        className='w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 ease-out' 
+                        loading='lazy' 
+                      />
+                    </div>
+                    <span className='text-[11px] sm:text-xs font-semibold text-stone-700 group-hover:text-brand-crimson transition-colors leading-tight max-w-[88px] sm:max-w-[100px] truncate'>
+                      {cat.name}
+                    </span>
+                  </Link>
+                ))}
+              </div>
             </div>
           </section>
 

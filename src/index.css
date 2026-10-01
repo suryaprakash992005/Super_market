@@ -94,6 +94,23 @@
   animation-play-state: paused;
 }
 
+/* Category Shortcuts Continuous Scrolling Marquee (Hardware Accelerated 60-120fps) */
+@keyframes categoryMarquee {
+  0% { transform: translate3d(0, 0, 0); }
+  100% { transform: translate3d(-50%, 0, 0); }
+}
+
+.animate-category-marquee {
+  display: flex;
+  width: max-content;
+  animation: categoryMarquee 34s linear infinite;
+  will-change: transform;
+}
+
+.animate-category-marquee:hover {
+  animation-play-state: paused;
+}
+
 /* Add-to-Cart pulse and reaction animations */
 @keyframes cartBounce {
   0%, 100% { transform: scale(1); }
