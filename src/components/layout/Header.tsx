@@ -153,7 +153,6 @@ export const Header: React.FC = () => {
 
   // Micro-interaction states
   const [isWishlistPulsing, setIsWishlistPulsing] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
 
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
@@ -175,22 +174,6 @@ export const Header: React.FC = () => {
     window.addEventListener('keydown', handleGlobalKeyDown);
     return () => window.removeEventListener('keydown', handleGlobalKeyDown);
   }, [isSearchFocused]);
-
-  // Scroll listener for compact sticky header (stable height transition, zero layout shift)
-  useEffect(() => {
-    let ticking = false;
-    const handleScroll = () => {
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          setIsScrolled(window.scrollY > 35);
-          ticking = false;
-        });
-        ticking = true;
-      }
-    };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   // Filter matching products with real-time scoring
   const matchingProducts = useMemo(() => {
@@ -325,9 +308,9 @@ export const Header: React.FC = () => {
     .trim();
 
   return (
-    <>
-      {/* 1. Static Top Announcement Bar (Natural inertia scroll, zero CLS) */}
-      <div className="bg-[#111111] text-stone-300 text-[11px] border-b border-stone-800 select-none animate-entrance-topbar">
+    <header className="sticky top-0 z-40 bg-white font-sans border-b border-surface-border shadow-xs">
+      {/* 1. Stationary Top Announcement Bar - Pinned at top on all devices */}
+      <div className="bg-[#111111] text-stone-300 text-[11px] border-b border-stone-800 select-none">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-1.5 flex items-center justify-between">
           <div className="flex items-center gap-3 sm:gap-6 overflow-hidden">
             <span className="flex items-center gap-2 font-medium text-stone-200 shrink-0">
@@ -361,22 +344,8 @@ export const Header: React.FC = () => {
         </div>
       </div>
 
-      {/* 2. Main Sticky Navigation Header (Scroll-Aware, Smooth Padded Transition) */}
-      <header 
-        className={cn(
-          "sticky top-0 z-40 bg-white/98 backdrop-blur-md border-b transition-all duration-200 font-sans",
-          isScrolled 
-            ? "border-surface-border shadow-subtle bg-white/95" 
-            : "border-surface-border/80 shadow-xs"
-        )}
-      >
-        {/* Main Header Row - relative z-30 guarantees search dropdown floats over department bar */}
-        <div 
-          className={cn(
-            "relative z-30 max-w-7xl mx-auto px-3 sm:px-6 flex items-center justify-between gap-2 sm:gap-6 transition-all duration-200",
-            isScrolled ? "py-2 sm:py-3" : "py-2.5 sm:py-3.5"
-          )}
-        >
+      {/* 2. Main Header Row - Invariant height & padding, 100% stationary on all devices */}
+      <div className="relative z-30 max-w-7xl mx-auto px-3 sm:px-6 py-2.5 sm:py-3 flex items-center justify-between gap-2 sm:gap-6 bg-white">
           {/* Brand Logo with Refined Entrance & Subtle Hover Animation */}
           <div className="flex items-center gap-2 sm:gap-3 shrink-0 min-w-0 animate-entrance-logo">
             <button
@@ -1373,7 +1342,6 @@ export const Header: React.FC = () => {
           </div>
         )}
       </header>
-    </>
   );
 };
 
